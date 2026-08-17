@@ -7,8 +7,9 @@ import os
 
 @fixture(scope="session")
 def conn() -> Connector:
-    if os.path.exists("test.db"): os.remove("test.db")
-    return Connector("test.db")
+    file = "test_db.db"
+    if os.path.exists(file): os.remove(file)
+    return Connector(file)
 
 class TestUtils:
     pass
