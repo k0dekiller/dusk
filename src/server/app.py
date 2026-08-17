@@ -7,9 +7,9 @@ from . import rest
 from .rest import response
 from . import db
 
-db.connect("data.db")
-users = db.Users()
-tokens = db.Tokens()
+conn = db.Connector("data.db")
+users = db.Users(conn)
+tokens = db.Tokens(conn)
 
 def mkpath(path: str = "") -> Callable[..., str]:
     def p(subpath: str = "") -> str:
@@ -48,7 +48,9 @@ class Root:
     def login(username: str, password: str) -> response:
         valid = users.login(username, password)
         if not valid: return err.invalid_login()
-        id = cast(int, users.id(username))
+        info = users.info(username=username)
+        if not info: return err.invalid_login()
+        id: int = info["id"]
         token = tokens.create(id)
         print(valid, id, token)
         return jsonify(token)
