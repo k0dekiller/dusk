@@ -50,31 +50,31 @@ class TestUsers:
         assert info["id"] == 1
 
     def test_info_invalid(self, users: Users) -> None:
-        assert users.info(username="invalid") == None
+        assert users.info(username="invalid") is None
 
     def test_exists_valid(self, users: Users) -> None:
-        assert users.exists(username="test1") == True
+        assert users.exists(username="test1") is True
 
     def test_exists_invalid(self, users: Users) -> None:
-        assert users.exists(username="invalid") == False
+        assert users.exists(username="invalid") is False
 
     def test_valid_valid(self, users: Users) -> None:
-        assert users.valid(username="test1") == True
+        assert users.valid(username="test1") is True
 
     def test_valid_invalid(self, users: Users) -> None:
-        assert users.valid(username="invalid") == False
+        assert users.valid(username="invalid") is False
 
     def test_archived_valid(self, users: Users) -> None:
-        assert users.archived(username="test1") == False
+        assert users.archived(username="test1") is False
 
     def test_archived_invalid(self, users: Users) -> None:
-        assert users.archived(username="invalid") == False
+        assert users.archived(username="invalid") is False
 
     def test_login_incorrect(self, users: Users) -> None:
-        assert users.login("test1", "wrong1") == False
+        assert users.login("test1", "wrong1") is False
 
     def test_login_correct(self, users: Users) -> None:
-        assert users.login("test1", "password1") == True
+        assert users.login("test1", "password1") is True
 
     def test_archive_valid(self, users: Users) -> None:
         users.delete(username="test1")
@@ -84,16 +84,16 @@ class TestUsers:
             users.delete(username="invalid")
 
     def test_login_archived(self, users: Users) -> None:
-        assert users.login("test1", "password1") == False
+        assert users.login("test1", "password1") is False
 
     def test_exists_archived(self, users: Users) -> None:
-        assert users.exists(username="test1") == True
+        assert users.exists(username="test1") is True
 
     def test_valid_archived(self, users: Users) -> None:
-        assert users.valid(username="test1") == False
+        assert users.valid(username="test1") is False
 
     def test_archived_archived(self, users: Users) -> None:
-        assert users.archived(username="test1") == True
+        assert users.archived(username="test1") is True
 
     def test_delete_valid(self, users: Users) -> None:
         users.delete(username="test1", hard=True)
@@ -103,16 +103,16 @@ class TestUsers:
             users.delete(username="invalid", hard=True)
 
     def test_login_correct_deleted(self, users: Users) -> None:
-        assert users.login("test1", "password1") == False
+        assert users.login("test1", "password1") is False
 
     def test_exists_deleted(self, users: Users) -> None:
-        assert users.exists(username="test1") == False
+        assert users.exists(username="test1") is False
 
     def test_valid_deleted(self, users: Users) -> None:
-        assert users.valid(username="test1") == False
+        assert users.valid(username="test1") is False
 
     def test_archived_deleted(self, users: Users) -> None:
-        assert users.archived(username="test1") == False
+        assert users.archived(username="test1") is False
 
 @fixture(scope="session")
 def invites(conn: Connector) -> Invites:
@@ -132,25 +132,25 @@ class TestInvites:
         assert info["id"] == 1
 
     def test_info_invalid(self, invites: Invites) -> None:
-        assert invites.info(code="invalid") == None
+        assert invites.info(code="invalid") is None
 
     def test_exists_valid(self, invites: Invites, invite: str) -> None:
-        assert invites.exists(code=invite) == True
+        assert invites.exists(code=invite) is True
 
     def test_exists_invalid(self, invites: Invites) -> None:
-        assert invites.exists(code="invalid") == False
+        assert invites.exists(code="invalid") is False
 
     def test_valid_valid(self, invites: Invites, invite: str) -> None:
-        assert invites.valid(code=invite) == True
+        assert invites.valid(code=invite) is True
 
     def test_valid_invalid(self, invites: Invites) -> None:
-        assert invites.valid(code="invalid") == False
+        assert invites.valid(code="invalid") is False
 
     def test_archived_valid(self, invites: Invites, invite: str) -> None:
-        assert invites.archived(code=invite) == False
+        assert invites.archived(code=invite) is False
 
     def test_archived_invalid(self, invites: Invites) -> None:
-        assert invites.archived(code="invalid") == False
+        assert invites.archived(code="invalid") is False
 
     def test_archive_valid(self, invites: Invites, invite: str) -> None:
         invites.delete(code=invite)
@@ -160,13 +160,13 @@ class TestInvites:
             invites.delete(code="invalid")
 
     def test_exists_archived(self, invites: Invites, invite: str) -> None:
-        assert invites.exists(code=invite) == True
+        assert invites.exists(code=invite) is True
 
     def test_valid_archived(self, invites: Invites, invite: str) -> None:
-        assert invites.valid(code=invite) == False
+        assert invites.valid(code=invite) is False
 
     def test_archived_archived(self, invites: Invites, invite: str) -> None:
-        assert invites.archived(code=invite) == True
+        assert invites.archived(code=invite) is True
 
     def test_delete_valid(self, invites: Invites, invite: str) -> None:
         invites.delete(code=invite, hard=True)
@@ -176,13 +176,13 @@ class TestInvites:
             invites.delete(code="invalid", hard=True)
 
     def test_exists_deleted(self, invites: Invites, invite: str) -> None:
-        assert invites.exists(code=invite) == False
+        assert invites.exists(code=invite) is False
 
     def test_valid_deleted(self, invites: Invites, invite: str) -> None:
-        assert invites.valid(code=invite) == False
+        assert invites.valid(code=invite) is False
 
     def test_archived_deleted(self, invites: Invites, invite: str) -> None:
-        assert invites.archived(code=invite) == False
+        assert invites.archived(code=invite) is False
 
 @fixture(scope="session")
 def tokens(conn: Connector) -> Tokens:
@@ -202,25 +202,25 @@ class TestTokens:
         assert info["id"] == 1
 
     def test_info_invalid(self, tokens: Tokens) -> None:
-        assert tokens.info(token="invalid") == None
+        assert tokens.info(token="invalid") is None
 
     def test_exists_valid(self, tokens: Tokens, token: str) -> None:
-        assert tokens.exists(token=token) == True
+        assert tokens.exists(token=token) is True
 
     def test_exists_invalid(self, tokens: Tokens) -> None:
-        assert tokens.exists(token="invalid") == False
+        assert tokens.exists(token="invalid") is False
 
     def test_valid_valid(self, tokens: Tokens, token: str) -> None:
-        assert tokens.exists(token=token) == True
+        assert tokens.exists(token=token) is True
 
     def test_valid_invalid(self, tokens: Tokens) -> None:
-        assert tokens.exists(token="invalid") == False
+        assert tokens.exists(token="invalid") is False
 
     def test_archived_valid(self, tokens: Tokens, token: str) -> None:
-        assert tokens.archived(token=token) == False
+        assert tokens.archived(token=token) is False
 
     def test_archived_invalid(self, tokens: Tokens) -> None:
-        assert tokens.archived(token="invalid") == False
+        assert tokens.archived(token="invalid") is False
 
     def test_archive_token_valid(self, tokens: Tokens, token: str) -> None:
         tokens.delete(token=token)
@@ -230,13 +230,13 @@ class TestTokens:
             tokens.delete(token="invalid")
 
     def test_exists_archived(self, tokens: Tokens, token: str) -> None:
-        assert tokens.exists(token=token) == True
+        assert tokens.exists(token=token) is True
 
     def test_valid_archived(self, tokens: Tokens, token: str) -> None:
-        assert tokens.valid(token=token) == False
+        assert tokens.valid(token=token) is False
 
     def test_archived_archived(self, tokens: Tokens, token: str) -> None:
-        assert tokens.archived(token=token) == True
+        assert tokens.archived(token=token) is True
 
     def test_delete_token_valid(self, tokens: Tokens, token: str) -> None:
         tokens.delete(token=token, hard=True)
@@ -246,10 +246,10 @@ class TestTokens:
             tokens.delete(token="invalid", hard=True)
 
     def test_exists_deleted(self, tokens: Tokens, token: str) -> None:
-        assert tokens.exists(token=token) == False
+        assert tokens.exists(token=token) is False
 
     def test_valid_deleted(self, tokens: Tokens, token: str) -> None:
-        assert tokens.valid(token=token) == False
+        assert tokens.valid(token=token) is False
 
     def test_archived_deleted(self, tokens: Tokens, token: str) -> None:
-        assert tokens.archived(token=token) == False
+        assert tokens.archived(token=token) is False
