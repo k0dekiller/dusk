@@ -1,6 +1,4 @@
 from collections.abc import Callable
-from typing import cast
-
 from flask import Flask, jsonify
 
 from . import rest
