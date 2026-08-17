@@ -25,14 +25,14 @@ class err:
             rest.err.param.value.invalid,
             desc=f"Invalid parameters",
             params=param
-        ))
+        )), 400
     @staticmethod
     def invalid_login() -> response:
         return jsonify(rest.error(
             rest.err.param.value.invalid,
             desc=f"Invalid username or password",
             params=["username", "password"]
-        ))
+        )), 400
 
 class Root:
     path = mkpath()
