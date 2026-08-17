@@ -6,7 +6,7 @@ import inspect
 from flask import Response, jsonify, request
 
 type body = dict[str, Any]
-type response = Response | tuple[Response | str, int]
+type response = Response | tuple[Response | str, int] | str
 
 class err:
     class param:
