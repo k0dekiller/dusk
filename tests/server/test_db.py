@@ -211,10 +211,10 @@ class TestTokens:
         assert tokens.exists(token="invalid") is False
 
     def test_valid_valid(self, tokens: Tokens, token: str) -> None:
-        assert tokens.exists(token=token) is True
+        assert tokens.valid(token=token) is True
 
     def test_valid_invalid(self, tokens: Tokens) -> None:
-        assert tokens.exists(token="invalid") is False
+        assert tokens.valid(token="invalid") is False
 
     def test_archived_valid(self, tokens: Tokens, token: str) -> None:
         assert tokens.archived(token=token) is False
