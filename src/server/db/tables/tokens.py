@@ -20,7 +20,7 @@ class Tokens(Table):
             self.TokenAlreadyExistsError,
             self.TokenConstraintError,
             self.ForeignConstraintError,
-            create_conflict=self.OwnerNotFoundError
+            create_foreign_constraint=self.OwnerNotFoundError
         ))
         self.init()
     def init(self) -> None:

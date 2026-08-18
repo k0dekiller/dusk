@@ -20,7 +20,7 @@ class Invites(Table):
             self.InviteAlreadyExistsError,
             self.InviteConstraintError,
             self.ForeignConstraintError,
-            create_conflict=self.OwnerNotFoundError
+            create_foreign_constraint=self.OwnerNotFoundError
         ))
         self.init()
     def init(self) -> None:

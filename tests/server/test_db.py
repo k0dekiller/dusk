@@ -33,11 +33,20 @@ def users(conn: Connector) -> Users:
 class TestUsers:
     def test_create_password_valid(self, users: Users) -> None:
         users.create("test1", "password1")
-        users.create("test2", "password2")
 
     def test_create_username_taken(self, users: Users) -> None:
         with raises(users.UserAlreadyExistsError):
             users.create("test1", "password1")
+
+    def test_create_invite_valid(self, users: Users) -> None:
+        users.create("test2", "password2", (1, 1))
+
+    def test_create_invite_id_invalid(self, users: Users) -> None:
+        users.create("test3", "password3", (None, 1))
+
+    def test_create_invite_n_invalid(self, users: Users) -> None:
+        with raises(users.UserConstraintError):
+            users.create("test3", "password3", (1, None))
 
     def test_info_valid(self, users: Users) -> None:
         info = users.get(username="test1")

@@ -15,14 +15,18 @@ class Table:
                 foreign_constraint: type[Exception],
                 *,
                 create_conflict: type[Exception] | None = None,
-                create_constraint: type[Exception] | None = None
+                create_constraint: type[Exception] | None = None,
+                create_foreign_constraint: type[Exception] | None = None
             ) -> None:
+            def default[A, B](value: A | None, default: B) -> A | B:
+                return value if value is not None else default
             self.not_found = not_found
             self.conflict = conflict
             self.constraint = constraint
             self.foreign_constraint = foreign_constraint
-            self.create_conflict = create_conflict if create_conflict is not None else conflict
-            self.create_constraint = create_constraint if create_constraint is not None else constraint
+            self.create_conflict = default(create_conflict, conflict)
+            self.create_constraint = default(create_constraint, constraint)
+            self.create_foreign_constraint = default(create_foreign_constraint, constraint)
     class Utils:
         type optdefault = str | bool | None
         type LiveQuery[R] = Callable[Concatenate[str, Any, ...], R]
@@ -97,7 +101,7 @@ class Table:
                     if desc.startswith("UNIQUE constraint failed"):
                         raise self.errors.create_conflict(*e.args) from e
                     if desc.startswith("FOREIGN KEY constraint failed"):
-                        raise self.errors.foreign_constraint(*e.args) from e
+                        raise self.errors.create_foreign_constraint(*e.args) from e
                     raise self.errors.create_constraint(*e.args) from e
                     
                 raise
