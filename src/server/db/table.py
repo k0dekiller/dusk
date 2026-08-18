@@ -12,12 +12,15 @@ class Table:
                 not_found: type[Exception],
                 conflict: type[Exception],
                 constraint: type[Exception],
+                foreign_constraint: type[Exception],
+                *,
                 create_conflict: type[Exception] | None = None,
                 create_constraint: type[Exception] | None = None
             ) -> None:
             self.not_found = not_found
             self.conflict = conflict
             self.constraint = constraint
+            self.foreign_constraint = foreign_constraint
             self.create_conflict = create_conflict if create_conflict is not None else conflict
             self.create_constraint = create_constraint if create_constraint is not None else constraint
     class Utils:
@@ -92,8 +95,10 @@ class Table:
                 if len(e.args) > 0:
                     desc: str = e.args[0]
                     if desc.startswith("UNIQUE constraint failed"):
-                        raise self.errors.create_conflict from e
-                    raise self.errors.create_constraint(e.args) from e
+                        raise self.errors.create_conflict(*e.args) from e
+                    if desc.startswith("FOREIGN KEY constraint failed"):
+                        raise self.errors.foreign_constraint(*e.args) from e
+                    raise self.errors.create_constraint(*e.args) from e
                     
                 raise
         def get(self, q: str | None = None, *v: Any) -> Row | None:
@@ -141,7 +146,7 @@ class Table:
         pass
     class ResourceConstraintError(NoRowsAffectedError):
         pass
-    class ForeignResourceConstraintError(ResourceConstraintError):
+    class ForeignConstraintError(ResourceConstraintError):
         pass
     class ResourceAlreadyExistsError(ResourceConstraintError):
         pass
@@ -150,7 +155,8 @@ class Table:
         if errors is None: errors = self.Errors(
             self.ResourceNotFoundError,
             self.ResourceAlreadyExistsError,
-            self.ResourceConstraintError
+            self.ResourceConstraintError,
+            self.ForeignConstraintError
         )
         self.utils = self.Utils(self, errors)
     def run[R](self, f: Callable[[Cursor], R]) -> R:
