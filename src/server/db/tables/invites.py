@@ -16,6 +16,8 @@ class Invites(Table):
             self.InviteAlreadyExistsError,
             create_conflict=self.OwnerNotFoundError
         ))
+        self.init()
+    def init(self) -> None:
         self.utils.init(
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
             code="TEXT NOT NULL UNIQUE",

@@ -16,6 +16,8 @@ class Tokens(Table):
             self.TokenAlreadyExistsError,
             create_conflict=self.OwnerNotFoundError
         ))
+        self.init()
+    def init(self) -> None:
         self.utils.init(
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
             owner="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",

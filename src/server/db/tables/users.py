@@ -12,6 +12,8 @@ class Users(Table):
             self.UserNotFoundError,
             self.UserAlreadyExistsError
         ))
+        self.init()
+    def init(self) -> None:
         self.utils.init(
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
             username="TEXT UNIQUE NOT NULL",
