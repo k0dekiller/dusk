@@ -92,8 +92,9 @@ class Table:
                 if len(e.args) > 0:
                     desc: str = e.args[0]
                     if desc.startswith("UNIQUE constraint failed"):
-                        raise self.errors.create_constraint(e.args) from e
-                    raise self.errors.create_conflict from e
+                        raise self.errors.create_conflict from e
+                    raise self.errors.create_constraint(e.args) from e
+                    
                 raise
         def get(self, q: str | None = None, *v: Any) -> Row | None:
             return self.exec(
