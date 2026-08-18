@@ -11,11 +11,15 @@ class Table:
         def __init__(self,
                 not_found: type[Exception],
                 conflict: type[Exception],
-                create_conflict: type[Exception] | None = None
+                constraint: type[Exception],
+                create_conflict: type[Exception] | None = None,
+                create_constraint: type[Exception] | None = None
             ) -> None:
             self.not_found = not_found
             self.conflict = conflict
+            self.constraint = constraint
             self.create_conflict = create_conflict if create_conflict is not None else conflict
+            self.create_constraint = create_constraint if create_constraint is not None else constraint
     class Utils:
         type optdefault = str | bool | None
         type LiveQuery[R] = Callable[Concatenate[str, Any, ...], R]
@@ -85,7 +89,12 @@ class Table:
                     *v, fetch=None
                 )
             except sql.IntegrityError as e:
-                raise self.errors.create_conflict from e
+                if len(e.args) > 0:
+                    desc: str = e.args[0]
+                    if desc.startswith("UNIQUE constraint failed"):
+                        raise self.errors.create_constraint(e.args) from e
+                    raise self.errors.create_conflict from e
+                raise
         def get(self, q: str | None = None, *v: Any) -> Row | None:
             return self.exec(
                 f"SELECT * FROM {self().name}{self.where(q)}",
@@ -131,11 +140,14 @@ class Table:
         pass
     class ResourceAlreadyExistsError(NoRowsAffectedError):
         pass
+    class ResourceConstraintError(NoRowsAffectedError):
+        pass
     def __init__(self, conn: Connector, errors: Errors | None = None) -> None:
         self.conn = conn
         if errors is None: errors = self.Errors(
             self.ResourceNotFoundError,
-            self.ResourceAlreadyExistsError
+            self.ResourceAlreadyExistsError,
+            self.ResourceConstraintError
         )
         self.utils = self.Utils(self, errors)
     def run[R](self, f: Callable[[Cursor], R]) -> R:

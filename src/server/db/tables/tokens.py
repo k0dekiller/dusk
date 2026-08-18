@@ -8,12 +8,15 @@ class Tokens(Table):
         pass
     class TokenAlreadyExistsError(Table.ResourceAlreadyExistsError):
         pass
+    class TokenConstraintError(Table.ResourceConstraintError):
+        pass
     class OwnerNotFoundError(Users.UserNotFoundError):
         pass
     def __init__(self, conn: Connector) -> None:
         super().__init__(conn, self.Errors(
             self.TokenNotFoundError,
             self.TokenAlreadyExistsError,
+            self.TokenConstraintError,
             create_conflict=self.OwnerNotFoundError
         ))
         self.init()
