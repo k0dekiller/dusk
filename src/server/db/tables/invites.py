@@ -20,7 +20,7 @@ class Invites(Table):
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
             code="TEXT NOT NULL UNIQUE",
             owner="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
-            max_uses="INTEGER NOT NULL",
+            max_uses="INTEGER",
             created_at="TEXT NOT NULL",
             use_count="INTEGER NOT NULL DEFAULT 0",
             archived_at="TEXT"
