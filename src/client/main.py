@@ -1,4 +1,4 @@
-from . import rest
+from .api import Client
 
-rest.connect("http://localhost:8080")
-rest.login("hackerman", "password")
+c = Client("http://localhost:8080", username="test1", password="password1")
+c.login()
