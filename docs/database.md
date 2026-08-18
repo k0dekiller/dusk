@@ -1,4 +1,32 @@
-# Database structure
+  # Database
+
+## Assumptions
+
+### Idempotency
+Any query method that returns `None` that doesn't affect any rows (e.g. deleting a nonexistent resource, archiving an already archived resource) will raise the `NoRowsAffectedError` or one of its subclasses.
+
+## Functions
+
+### `.get()`
+
+Returns the entire `Row` object or `None` if no match.
+
+### `.exists()`
+
+Returns `True` if a `Row` object is present.
+
+### `.valid()`
+
+Returns `True` if a `Row` object is not archived.
+
+> [!NOTE]
+> This function, despite its name, doesn't include any table-specific logic to determine if a `Row`'s resource is actually valid. Any server-side logic is still in `server/app.py` or in other table-specific database functions.
+
+### `.archived()`
+
+Returns `True` if a `Row` object is archived.
+
+## Structure
 
 - [x] `invites`
     - [x] `id`
@@ -22,8 +50,3 @@
     - [x] `token_hash`
     - [x] `created_at`
     - [x] `last_used_at?`
-
-# Assumptions
-
-## Idempotency
-Any query method that returns `None` that doesn't affect any rows (e.g. deleting a nonexistent resource, archiving an already archived resource) will raise the `NoRowsAffectedError` or one of its subclasses.
