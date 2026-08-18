@@ -10,6 +10,8 @@ class Tokens(Table):
         pass
     class TokenConstraintError(Table.ResourceConstraintError):
         pass
+    class ForeignConstraintError(Table.ForeignConstraintError):
+        pass
     class OwnerNotFoundError(Users.UserNotFoundError):
         pass
     def __init__(self, conn: Connector) -> None:
@@ -17,6 +19,7 @@ class Tokens(Table):
             self.TokenNotFoundError,
             self.TokenAlreadyExistsError,
             self.TokenConstraintError,
+            self.ForeignConstraintError,
             create_conflict=self.OwnerNotFoundError
         ))
         self.init()

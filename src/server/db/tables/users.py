@@ -9,11 +9,14 @@ class Users(Table):
         pass
     class UserConstraintError(Table.ResourceConstraintError):
         pass
+    class ForeignConstraintError(Table.ForeignConstraintError):
+        pass
     def __init__(self, conn: Connector) -> None:
         super().__init__(conn, self.Errors(
             self.UserNotFoundError,
             self.UserAlreadyExistsError,
-            self.UserConstraintError
+            self.UserConstraintError,
+            self.ForeignConstraintError
         ))
         self.init()
     def init(self) -> None:

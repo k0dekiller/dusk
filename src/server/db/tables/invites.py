@@ -10,6 +10,8 @@ class Invites(Table):
         pass
     class InviteConstraintError(Table.ResourceConstraintError):
         pass
+    class ForeignConstraintError(Table.ForeignConstraintError):
+        pass
     class OwnerNotFoundError(Users.UserNotFoundError):
         pass
     def __init__(self, conn: Connector) -> None:
@@ -17,6 +19,7 @@ class Invites(Table):
             self.InviteNotFoundError,
             self.InviteAlreadyExistsError,
             self.InviteConstraintError,
+            self.ForeignConstraintError,
             create_conflict=self.OwnerNotFoundError
         ))
         self.init()
