@@ -3,7 +3,7 @@ import os
 class KeyNotFoundError(Exception):
     pass
 
-file = f"{os.path.dirname(os.path.abspath(__file__))}/key.bin"
+file = f"key.bin"
 key = b""
 
 def gen() -> None:
