@@ -1,6 +1,5 @@
 from ..table import Table
 from ..imports import *
-from ... import validator as v
 
 class Users(Table):
     name = "users"
@@ -21,8 +20,6 @@ class Users(Table):
             created_at="TEXT NOT NULL"
         )
     def create(self, username: str, password: str) -> None:
-        v.username.check(username)
-        v.password.check(password)
         self.utils.create(username=username, password_hash=hash(password), created_at=now())
     @overload#1
     def get(self, *, username: str) -> Row | None: ...
