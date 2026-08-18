@@ -53,26 +53,14 @@ class Tokens(Table):
     def archived(self, *, token: str | None = None, id: int | None = None) -> bool:
         return self.utils.any_sv(over(token_hash=hash(token), id=id), arch=True)
     @overload#1
-    def set(self, *, token: str) -> bool: ...
+    def set(self, *, token: str, **kwargs: Any) -> None: ...
     @overload#2
-    def set(self, *, id: int) -> bool: ...
-    def set(self, *, token: str | None = None, id: int | None = None) -> bool:
-        ... # TODO
+    def set(self, *, id: int, **kwargs: Any) -> None: ...
+    def set(self, *, token: str | None = None, id: int | None = None, **kwargs: Any) -> None:
+        self.utils.set_sv(over(token_hash=hash(token), id=id), kwargs)
     @overload#1
     def delete(self, *, token: str, hard: bool = False) -> None: ...
     @overload#2
     def delete(self, *, id: int, hard: bool = False) -> None: ...
     def delete(self, *, token: str | None = None, id: int | None = None, hard: bool = False) -> None:
-        sel, val = over(token_hash=hash(token), id=id)
-        @self.run
-        def op(c: Cursor) -> None:
-            if not hard: c.execute(
-                    f"UPDATE {self.name} SET archived_at = ? WHERE {sel} = ? AND archived_at IS NULL",
-                    (now(), val,)
-                )
-            else: c.execute(
-                    f"DELETE FROM {self.name} WHERE {sel} = ?",
-                    (val,)
-                )
-            if c.rowcount <= 0:
-                raise self.TokenNotFoundError(f"{sel}={val!r}")
+        self.utils.delete_sv(over(token_hash=hash(token), id=id), hard=hard)

@@ -46,17 +46,17 @@ class Users(Table):
     def archived(self, *, username: str | None = None, id: int | None = None) -> bool:
         return self.utils.any_sv(over(username=username, id=id), arch=True)
     @overload#1
-    def set(self, *, username: str) -> bool: ...
+    def set(self, *, username: str, **kwargs: Any) -> None: ...
     @overload#2
-    def set(self, *, id: int) -> bool: ...
-    def set(self, *, username: str | None = None, id: int | None = None) -> bool:
-        ... # TODO
+    def set(self, *, id: int, **kwargs: Any) -> None: ...
+    def set(self, *, username: str | None = None, id: int | None = None, **kwargs: Any) -> None:
+        self.utils.set_sv(over(username=username, id=id), kwargs)
     @overload#1
     def delete(self, *, username: str, hard: bool = False) -> None: ...
     @overload#2
     def delete(self, *, id: int, hard: bool = False) -> None: ...
     def delete(self, *, username: str | None = None, id: int | None = None, hard: bool = False) -> None:
-        return self.utils.delete_sv(over(username=username, id=id), hard=hard)
+        self.utils.delete_sv(over(username=username, id=id), hard=hard)
     def login(self, username: str, password: str) -> bool:
         @self.run
         def op(c: Cursor) -> bool:
