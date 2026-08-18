@@ -139,9 +139,11 @@ class Table:
     name: str
     class ResourceNotFoundError(NoRowsAffectedError):
         pass
-    class ResourceAlreadyExistsError(NoRowsAffectedError):
-        pass
     class ResourceConstraintError(NoRowsAffectedError):
+        pass
+    class ForeignResourceConstraintError(ResourceConstraintError):
+        pass
+    class ResourceAlreadyExistsError(ResourceConstraintError):
         pass
     def __init__(self, conn: Connector, errors: Errors | None = None) -> None:
         self.conn = conn
