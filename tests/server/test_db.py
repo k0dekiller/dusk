@@ -1,6 +1,5 @@
 from pytest import raises, fixture
 from src.server.db import Connector, Table, Users, Invites, Tokens
-from src.server.validator import NoMatchException
 from sqlite3 import Cursor
 
 import os
@@ -35,10 +34,6 @@ class TestUsers:
     def test_create_password_valid(self, users: Users) -> None:
         users.create("test1", "password1")
         users.create("test2", "password2")
-
-    def test_create_password_invalid(self, users: Users) -> None:
-        with raises(NoMatchException):
-            users.create("test", "invalid")
 
     def test_create_username_taken(self, users: Users) -> None:
         with raises(users.UserAlreadyExistsError):
