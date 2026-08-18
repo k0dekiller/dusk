@@ -17,10 +17,22 @@ class Users(Table):
             username="TEXT UNIQUE NOT NULL",
             password_hash="TEXT NOT NULL",
             archived_at="TEXT",
-            created_at="TEXT NOT NULL"
+            created_at="TEXT NOT NULL",
+            used_invite="INTEGER",# -> invites(id)
+            used_invite_n="INTEGER",
+            check_used_invite="(used_invite IS NULL) OR (used_invite_n IS NOT NULL)"
         )
-    def create(self, username: str, password: str) -> None:
-        self.utils.create(username=username, password_hash=hash(password), created_at=now())
+    @overload#1
+    def create(self, username: str, password: str) -> None: ...
+    @overload#2
+    def create(self, username: str, password: str, invite: tuple[int, int]) -> None: ...
+    def create(self, username: str, password: str, invite: tuple[int, int] | None = None) -> None:
+        if invite is None:
+            self.utils.create(username=username, password_hash=hash(password), created_at=now())
+        else:
+            self.utils.create(username=username, password_hash=hash(password), created_at=now(),
+                used_invite=invite[0], used_invite_n=invite[1]
+            )
     @overload#1
     def get(self, *, username: str) -> Row | None: ...
     @overload#2
