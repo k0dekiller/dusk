@@ -64,13 +64,19 @@ class Table:
         def init(self, **kwargs: str) -> None:
             cols: list[str] = []
             foreign: list[str] = []
+            check: list[str] = []
             for k, v in kwargs.items():
                 s = v.split(" -> ")
-                cols.append(f"{k} {s[0]}")
                 if len(s) > 1:
+                    cols.append(f"{k} {s[0]}")
                     foreign.append(f"FOREIGN KEY ({k}) REFERENCES {s[1]}")
+                    continue
+                elif k.startswith("check_"):
+                    check.append(f"CONSTRAINT {k} CHECK ({v})")
+                    continue
+                cols.append(f"{k} {v}")
             self.exec(f"CREATE TABLE IF NOT EXISTS {self().name} ({
-                ", ".join(cols + foreign)
+                ", ".join(cols + foreign + check)
             })", fetch=None)
         def create(self, **kwargs: Any) -> None:
             k, v = zip(*kwargs.items())
