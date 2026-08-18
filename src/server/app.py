@@ -96,6 +96,7 @@ def app(db_path: str = "data.db") -> Flask:
 
             # get invite info
             info = row(invites.get(code=invite))
+            id: int = info["id"]
             count: int = info["use_count"]
             max: int | None = info["max_uses"]
 
@@ -106,7 +107,7 @@ def app(db_path: str = "data.db") -> Flask:
                 invites.delete(code=invite)
 
             # create the user
-            users.create(username, password)
+            users.create(username, password, (id, count))
 
             return success()
 
