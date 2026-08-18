@@ -87,6 +87,13 @@ class Table:
             )
         def any(self, q: str | None = None, *v: Any) -> bool:
             return self.get(q, *v) is not None
+        def set(self, set: dict[str, Any]) -> LiveQuery[None]:
+            def func(q: str | None = None, *v: Any) -> None:
+                self.exec(
+                    f"UPDATE {self().name} SET {", ".join(f"{key} = ?" for key in set.keys())}{self.where(q)}",
+                    *set.values(), *v, fetch=None
+                )
+            return func
         @overload
         def delete(self, hard: Literal[True]) -> LiveQuery[None]: ...
         @overload
@@ -111,6 +118,8 @@ class Table:
             return self.sv(self.any, sv, q, *v, arch=arch)
         def delete_sv(self, sv: tuple[str, Any], hard: bool = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
             return self.sv(self.delete(hard=hard), sv, q, *v, arch=arch)
+        def set_sv(self, sv: tuple[str, Any], set: dict[str, Any], q: str | None = None, *v: Any, arch: optdefault = None) -> None:
+            return self.sv(self.set(set), sv, q, *v, arch=arch)
     name: str
     class ResourceNotFoundError(NoRowsAffectedError):
         pass
