@@ -45,12 +45,12 @@ class TestUsers:
             users.create("test1", "password1")
 
     def test_info_valid(self, users: Users) -> None:
-        info = users.info(username="test1")
+        info = users.get(username="test1")
         assert info != None
         assert info["id"] == 1
 
     def test_info_invalid(self, users: Users) -> None:
-        assert users.info(username="invalid") is None
+        assert users.get(username="invalid") is None
 
     def test_exists_valid(self, users: Users) -> None:
         assert users.exists(username="test1") is True
@@ -127,12 +127,12 @@ class TestInvites:
             invites.create(0)
 
     def test_info_valid(self, invites: Invites, invite: str) -> None:
-        info = invites.info(code=invite)
+        info = invites.get(code=invite)
         assert info != None
         assert info["id"] == 1
 
     def test_info_invalid(self, invites: Invites) -> None:
-        assert invites.info(code="invalid") is None
+        assert invites.get(code="invalid") is None
 
     def test_exists_valid(self, invites: Invites, invite: str) -> None:
         assert invites.exists(code=invite) is True
@@ -197,12 +197,12 @@ class TestTokens:
             tokens.create(0)
 
     def test_info_valid(self, tokens: Tokens, token: str) -> None:
-        info = tokens.info(token=token)
+        info = tokens.get(token=token)
         assert info != None
         assert info["id"] == 1
 
     def test_info_invalid(self, tokens: Tokens) -> None:
-        assert tokens.info(token="invalid") is None
+        assert tokens.get(token="invalid") is None
 
     def test_exists_valid(self, tokens: Tokens, token: str) -> None:
         assert tokens.exists(token=token) is True
