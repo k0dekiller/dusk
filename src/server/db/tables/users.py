@@ -28,7 +28,9 @@ class Users(Table):
     def create(self, username: str, password: str) -> None: ...
     @overload#2
     def create(self, username: str, password: str, invite: tuple[int, int]) -> None: ...
-    def create(self, username: str, password: str, invite: tuple[int, int] | None = None) -> None:
+    @overload#3
+    def create(self, username: str, password: str, invite: tuple[int | None, int | None]) -> None: ...
+    def create(self, username: str, password: str, invite: tuple[int | None, int | None] | None = None) -> None:
         if invite is None:
             self.utils.create(username=username, password_hash=hash(password), created_at=now())
         else:
