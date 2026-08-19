@@ -52,7 +52,7 @@ def require(*args: str, src: Literal["json"] = "json") -> Callable[..., Callable
                             err.param.value.invalid_type,
                             desc = f"Parameter {repr(name)} is {repr(type(value))}, expected {repr(param["type"])}",
                             params = name
-                        ))
+                        )), 400
                 else:
                     if param["def"] == inspect.Parameter.empty:
                         return jsonify(error(
