@@ -7,6 +7,8 @@ Any query method that returns `None` that doesn't affect any rows (e.g. deleting
 
 ## Functions
 
+The functions below are implemented in every `Table` subclass.
+
 ### `.get()`
 
 Returns the entire `Row` object or `None` if no match.
@@ -14,6 +16,10 @@ Returns the entire `Row` object or `None` if no match.
 ### `.exists()`
 
 Returns `True` if a `Row` object is present.
+
+## Archivable resources functions
+
+The functions below are implement in every `Table` subclass that contains archivable resources.
 
 ### `.valid()`
 
