@@ -47,7 +47,7 @@ Returns `True` if a `Row` object is archived.
     - [x] `used_invite_n` **`?`** `used_invite`
 - [x] `tokens`
     - [x] `id`
-    - [x] `user_id` **→** `users.id`
+    - [x] `owner` **→** `users.id`
     - [x] `archived_at?`
     - [x] `token_hash`
     - [x] `created_at`
