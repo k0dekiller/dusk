@@ -73,8 +73,10 @@ def app(db_path: str = "data.db") -> Flask:
         @rest.require("username", "password")
         @staticmethod
         def login(username: str, password: str) -> response:
-            if not (v.username(username) and v.password(password) and users.login(username, password)):
+            if not (v.username(username) and v.password(password)):
                 return err.invalid_login()
+            if not users.login(username, password):
+                return err.wrong_login()
             info = row(users.get(username=username))
             id: int = info["id"]
             token = tokens.create(id)
