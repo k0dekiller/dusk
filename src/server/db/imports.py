@@ -1,5 +1,5 @@
 # pyright: reportUnusedImport=false
-from ..utils import now, hash, over
+from ..utils import now, hash, argon_hash, argon_verify, over
 from typing import Concatenate, Literal, Self, Any, overload
 from collections.abc import Callable
 from functools import wraps
