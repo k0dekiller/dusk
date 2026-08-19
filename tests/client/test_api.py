@@ -93,6 +93,9 @@ def test_server_running(server: Server) -> None:
 def test_connected(client: Client) -> None:
     assert client.connected() is True
 
+def test_connected_invalid() -> None:
+    assert Client("http://invalid").connected() is False
+
 class TestSignup:
     def test_valid(self, client: Client, invite: str) -> None:
         client.signup(invite)
