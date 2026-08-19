@@ -18,8 +18,6 @@ class Table:
                 create_constraint: type[Exception] | None = None,
                 create_foreign_constraint: type[Exception] | None = None
             ) -> None:
-            def default[A, B](value: A | None, default: B) -> A | B:
-                return value if value is not None else default
             self.not_found = not_found
             self.conflict = conflict
             self.constraint = constraint

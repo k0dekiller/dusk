@@ -16,6 +16,9 @@ def hash(s: str | None) -> str | None:
     if s is None: return
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
+def default[A, B](value: A | None, default: B) -> A | B:
+    return value if value is not None else default
+
 def over(**kwargs: Any) -> tuple[str, Any]:
     for k, v in kwargs.items():
         if v is None: continue
