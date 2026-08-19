@@ -53,7 +53,8 @@ class err:
 def success(data: rest.body | None = None) -> response:
     return jsonify(rest.success()), 200
 
-def row(row: Any) -> Row: return cast(Row, row)
+def row(row: Any) -> Row:
+    return cast(Row, row)
 
 def app(db_path: str = "data.db") -> Flask:
     app = Flask(__name__)

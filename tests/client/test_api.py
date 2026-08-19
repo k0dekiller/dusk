@@ -4,7 +4,7 @@ from collections.abc import Generator
 from _pytest.raises import RaisesExc
 from pytest import fixture, raises
 
-from src.server.db import Connector, Users, Invites, Tokens
+from src.server.db import Connector, Users, Invites
 from threading import Thread
 from werkzeug.serving import make_server
 from src.server.app import app as flask
@@ -50,9 +50,6 @@ def users(conn: Connector) -> Users:
 def invites(conn: Connector) -> Invites:
     return Invites(conn)
 @fixture(scope="session")
-def tokens(conn: Connector) -> Tokens:
-    return Tokens(conn)
-@fixture(scope="session")
 def user(users: Users) -> int:
     username = "system"
     users.create(username, "password")
@@ -68,9 +65,11 @@ def invite(invites: Invites, user: int) -> str:
 
 # CLIENT FIXTURES
 @fixture(scope="session")
-def username() -> str: return "test1"
+def username() -> str:
+    return "test1"
 @fixture(scope="session")
-def password() -> str: return "password1"
+def password() -> str:
+    return "password1"
 def new_client(username: str, password: str) -> Client:
     return Client(f"http://{host}:{port}", username=username, password=password)
 @fixture(scope="session")
