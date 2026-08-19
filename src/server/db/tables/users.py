@@ -38,9 +38,9 @@ class Users(Table):
     def create(self, username: str, password: str, invite: tuple[int | None, int | None]) -> None: ...
     def create(self, username: str, password: str, invite: tuple[int | None, int | None] | None = None) -> None:
         if invite is None:
-            self.utils.create(username=username, password_hash=hash(password), created_at=now())
+            self.utils.create(username=username, password_hash=argon_hash(password), created_at=now())
         else:
-            self.utils.create(username=username, password_hash=hash(password), created_at=now(),
+            self.utils.create(username=username, password_hash=argon_hash(password), created_at=now(),
                 used_invite=invite[0], used_invite_n=invite[1]
             )
     @overload#1
@@ -80,11 +80,6 @@ class Users(Table):
     def delete(self, *, username: str | None = None, id: int | None = None, hard: bool = False) -> None:
         self.utils.delete_sv(over(username=username, id=id), hard=hard)
     def login(self, username: str, password: str) -> bool:
-        @self.run
-        def op(c: Cursor) -> bool:
-            c.execute(
-                f"SELECT id FROM {self.name} WHERE username = ? AND password_hash = ? AND archived_at IS NULL",
-                (username, hash(password))
-            )
-            return c.fetchone() is not None
-        return op
+        row = self.utils.get_sv(over(username=username), arch=False)
+        if row is None: return False
+        return argon_verify(row["password_hash"], password)
