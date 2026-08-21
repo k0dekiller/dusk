@@ -27,7 +27,13 @@ class Table:
             self.create_foreign_constraint = default(create_foreign_constraint, constraint)
     class Utils:
         type optdefault = str | bool | None
-        type LiveQuery[R] = Callable[Concatenate[str, Any, ...], R]
+        type fetch_one = Literal["one"]
+        type fetch_all = Literal["all"]
+        type fetch_mode = fetch_one | fetch_all | int
+        type fetch_result = list[Row] | Row | None
+        type optfetch_mode = fetch_mode | None
+        type optfetch_result = fetch_result | int
+        type LiveQuery[R] = Callable[Concatenate[str | None, Any, ...], R]
         def __init__(self, _self: Table, errors: Table.Errors, arch: str = "archived_at") -> None:
             self._self = _self
             self.errors = errors
@@ -59,16 +65,16 @@ class Table:
         @overload
         def exec(self, query: str, *v: Any, fetch: Literal["all"] | int) -> list[Row]: ...
         @overload
-        def exec(self, query: str, *v: Any, fetch: None) -> int: ...
-        def exec(self, query: str, *v: Any, fetch: Literal["one", "all"] | int | None = None) -> list[Row] | Row | int | None:
+        def exec(self, query: str, *v: Any, fetch: None = None) -> int: ...
+        def exec(self, query: str, *v: Any, fetch: optfetch_mode = None) -> optfetch_result:
             @self().run
-            def op(c: Cursor) -> list[Row] | Row | int | None:
+            def op(c: Cursor) -> Table.Utils.optfetch_result:
                 c.execute(query, v)
                 match fetch:
-                    case "one": return c.fetchone()
-                    case "all": return c.fetchall()
-                    case None: return c.rowcount
-                    case _: return c.fetchmany()
+                    case "one": return c.fetchone() # -> Row | None
+                    case "all": return c.fetchall() # -> list[Row]
+                    case None: return c.rowcount # -> int
+                    case _: return c.fetchmany() # -> list[Row]
             return op
         def init(self, **kwargs: str) -> None:
             cols: list[str] = []
@@ -103,13 +109,19 @@ class Table:
                     raise self.errors.create_constraint(*e.args) from e
                     
                 raise
-        def get(self, q: str | None = None, *v: Any) -> Row | None:
-            return self.exec(
-                f"SELECT * FROM {self().name}{self.where(q)}",
-                *v, fetch="one"
-            )
+        @overload
+        def get(self, fetch: fetch_one = "one") -> LiveQuery[Row | None]: ...
+        @overload
+        def get(self, fetch: fetch_all | int) -> LiveQuery[list[Row]]: ...
+        def get(self, fetch: fetch_mode = "one") -> LiveQuery[fetch_result]:
+            def func(q: str | None = None, *v: Any) -> Table.Utils.fetch_result:
+                return self.exec(
+                    f"SELECT * FROM {self().name}{self.where(q)}",
+                    *v, fetch=fetch
+                )
+            return func
         def any(self, q: str | None = None, *v: Any) -> bool:
-            return self.get(q, *v) is not None
+            return self.get(fetch="one")(q, *v) is not None
         def set(self, set: dict[str, Any]) -> LiveQuery[None]:
             def func(q: str | None = None, *v: Any) -> None:
                 self.exec(
@@ -135,8 +147,12 @@ class Table:
                 if r == 0:
                     raise self.errors.not_found
             return func
-        def get_sv(self, sv: tuple[str, Any], q: str | None = None, *v: Any, arch: optdefault = None) -> Row | None:
-            return self.sv(self.get, sv, q, *v, arch=arch)
+        @overload
+        def get_sv(self, sv: tuple[str, Any], fetch: fetch_one = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> Row | None: ...
+        @overload
+        def get_sv(self, sv: tuple[str, Any], fetch: fetch_all | int, q: str | None = None, *v: Any, arch: optdefault = None) -> list[Row]: ...
+        def get_sv(self, sv: tuple[str, Any], fetch: fetch_mode = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> fetch_result:
+            return self.sv(self.get(fetch), sv, q, *v, arch=arch)
         def any_sv(self, sv: tuple[str, Any], q: str | None = None, *v: Any, arch: optdefault = None) -> bool:
             return self.sv(self.any, sv, q, *v, arch=arch)
         def delete_sv(self, sv: tuple[str, Any], hard: bool = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
