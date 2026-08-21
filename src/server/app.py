@@ -35,7 +35,7 @@ class err:
             rest.err.param.value.invalid,
             desc=f"Wrong username or password",
             params=["username", "password"]
-        ))
+        )), 400
     @staticmethod
     def invalid_login() -> response:
         return jsonify(rest.error(
