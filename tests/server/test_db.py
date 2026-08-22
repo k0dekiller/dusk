@@ -1,5 +1,5 @@
 from pytest import raises, fixture
-from src.server.db import Connector, Table, Users, Invites, Tokens
+from src.server.db import Connector, Table, Users, Invites, Tokens, Relationships
 from sqlite3 import Cursor
 
 import os
@@ -257,3 +257,51 @@ class TestTokens:
 
     def test_archived_deleted(self, tokens: Tokens, token: str) -> None:
         assert tokens.archived(token=token) is False
+
+@fixture(scope="session")
+def relationships(conn: Connector) -> Relationships:
+    return Relationships(conn)
+class TestRelationships:
+    def test_create_valid(self, relationships: Relationships) -> None:
+        relationships.create(2, 3)
+
+    def test_create_sender_invalid(self, relationships: Relationships) -> None:
+        with raises(relationships.RelationshipConstraintError):
+            relationships.create(0, 3)
+
+    def test_create_receiver_invalid(self, relationships: Relationships) -> None:
+        with raises(relationships.RelationshipConstraintError):
+            relationships.create(2, 0)
+
+    def test_create_invalid(self, relationships: Relationships) -> None:
+        with raises(relationships.RelationshipConstraintError):
+            relationships.create(0, 0)
+
+    def test_get_valid(self, relationships: Relationships) -> None:
+        info = relationships.get(id=1)
+        assert info is not None
+        assert info["id"] == 1
+
+    def test_get_sender_valid(self, relationships: Relationships) -> None:
+        infos = relationships.get(sender=2)
+        assert len(infos) == 1
+        info = infos[0]
+        assert info["sender"] == 2
+
+    def test_get_receiver_valid(self, relationships: Relationships) -> None:
+        infos = relationships.get(receiver=3)
+        assert len(infos) == 1
+        info = infos[0]
+        assert info["receiver"] == 3
+
+    def test_get_sender_receiver_valid(self, relationships: Relationships) -> None:
+        info = relationships.get(sender=2, receiver=3)
+        assert info is not None
+        assert info["sender"] == 2
+        assert info["receiver"] == 3
+
+    def test_exists_valid(self, relationships: Relationships) -> None:
+        assert relationships.exists(id=1) is True
+
+    def test_exists_invalid(self, relationships: Relationships) -> None:
+        assert relationships.exists(id=0) is False

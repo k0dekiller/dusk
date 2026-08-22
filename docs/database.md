@@ -1,4 +1,4 @@
-  # Database
+# Database
 
 ## Assumptions
 
@@ -11,7 +11,7 @@ The functions below are implemented in every `Table` subclass.
 
 ### `.get()`
 
-Returns the entire `Row` object or `None` if no match.
+Returns the entire `Row` object(s) or `None` if no match.
 
 ### `.exists()`
 
@@ -58,3 +58,10 @@ Returns `True` if a `Row` object is archived.
     - [x] `token_hash`
     - [x] `created_at`
     - [x] `last_used_at?`
+- [x] `relationships`
+    - [x] `id`
+    - [x] `sender` **→** `users.id`
+    - [x] `receiver` **→** `users.id`
+    - [x] `created_at`
+    - [x] `friends_since?`
+    - [x] `blocked_since?`
