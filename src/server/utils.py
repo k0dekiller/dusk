@@ -38,8 +38,11 @@ def argon_verify(hash: str, s: str) -> bool:
 def default[A, B](value: A | None, default: B) -> A | B:
     return value if value is not None else default
 
-def over(**kwargs: Any) -> tuple[str, Any]:
+def over(**kwargs: Any) -> dict[str, Any]:
+    d: dict[str, Any] = {}
     for k, v in kwargs.items():
         if v is None: continue
-        return k, v
+        d[k] = v
+    if d:
+        return d
     raise UnknownOverloadException
