@@ -26,6 +26,7 @@ class Table:
             self.create_constraint = default(create_constraint, constraint)
             self.create_foreign_constraint = default(create_foreign_constraint, constraint)
     class Utils:
+        type kwargs_t = dict[str, Any]
         type optdefault = str | bool | None
         type fetch_one = Literal["one"]
         type fetch_all = Literal["all"]
@@ -46,7 +47,7 @@ class Table:
         def sv[R](
                 self,
                 func: LiveQuery[R],
-                sv: tuple[str, Any], q: str | None = None, *v: Any,
+                sv: kwargs_t, q: str | None = None, *v: Any,
                 arch: optdefault = None
             ) -> R:
             if isinstance(arch, bool): arch = f"{"!" if arch else ""}{self.arch}"
@@ -54,11 +55,11 @@ class Table:
                 arch = arch[1:]
                 archinv = True
             else: archinv = False
-            return func(
-                f"{sv[0]} = ?"
+            return func(""
+                + (" AND ".join(f"{k} = ?" for k in sv.keys()))
                 + (f" AND {arch} IS {" NOT " if archinv else ""}NULL" if arch is not None else "")
                 + (f" {q}" if q is not None else ""),
-                sv[1], *v
+                *sv.values(), *v
             )
         @overload
         def exec(self, query: str, *v: Any, fetch: Literal["one"]) -> Row | None: ...
@@ -122,7 +123,7 @@ class Table:
             return func
         def any(self, q: str | None = None, *v: Any) -> bool:
             return self.get(fetch="one")(q, *v) is not None
-        def set(self, set: dict[str, Any]) -> LiveQuery[None]:
+        def set(self, set: kwargs_t) -> LiveQuery[None]:
             def func(q: str | None = None, *v: Any) -> None:
                 self.exec(
                     f"UPDATE {self().name} SET {", ".join(f"{key} = ?" for key in set.keys())}{self.where(q)}",
@@ -148,16 +149,16 @@ class Table:
                     raise self.errors.not_found
             return func
         @overload
-        def get_sv(self, sv: tuple[str, Any], fetch: fetch_one = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> Row | None: ...
+        def get_sv(self, sv: kwargs_t, fetch: fetch_one = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> Row | None: ...
         @overload
-        def get_sv(self, sv: tuple[str, Any], fetch: fetch_all | int, q: str | None = None, *v: Any, arch: optdefault = None) -> list[Row]: ...
-        def get_sv(self, sv: tuple[str, Any], fetch: fetch_mode = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> fetch_result:
+        def get_sv(self, sv: kwargs_t, fetch: fetch_all | int, q: str | None = None, *v: Any, arch: optdefault = None) -> list[Row]: ...
+        def get_sv(self, sv: kwargs_t, fetch: fetch_mode = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> fetch_result:
             return self.sv(self.get(fetch), sv, q, *v, arch=arch)
-        def any_sv(self, sv: tuple[str, Any], q: str | None = None, *v: Any, arch: optdefault = None) -> bool:
+        def any_sv(self, sv: kwargs_t, q: str | None = None, *v: Any, arch: optdefault = None) -> bool:
             return self.sv(self.any, sv, q, *v, arch=arch)
-        def delete_sv(self, sv: tuple[str, Any], hard: bool = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
+        def delete_sv(self, sv: kwargs_t, hard: bool = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
             return self.sv(self.delete(hard=hard), sv, q, *v, arch=arch)
-        def set_sv(self, sv: tuple[str, Any], set: dict[str, Any], q: str | None = None, *v: Any, arch: optdefault = None) -> None:
+        def set_sv(self, sv: kwargs_t, set: kwargs_t, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
             return self.sv(self.set(set), sv, q, *v, arch=arch)
     name: str
     class ResourceNotFoundError(NoRowsAffectedError):
