@@ -50,7 +50,7 @@ class TestUsers:
 
     def test_get_valid(self, users: Users) -> None:
         info = users.get(username="test1")
-        assert info != None
+        assert info is not None
         assert info["id"] == 1
 
     def test_get_invalid(self, users: Users) -> None:
@@ -132,7 +132,7 @@ class TestInvites:
 
     def test_get_valid(self, invites: Invites, invite: str) -> None:
         info = invites.get(code=invite)
-        assert info != None
+        assert info is not None
         assert info["id"] == 1
 
     def test_get_invalid(self, invites: Invites) -> None:
@@ -202,7 +202,7 @@ class TestTokens:
 
     def test_get_valid(self, tokens: Tokens, token: str) -> None:
         info = tokens.get(token=token)
-        assert info != None
+        assert info is not None
         assert info["id"] == 1
 
     def test_get_invalid(self, tokens: Tokens) -> None:
