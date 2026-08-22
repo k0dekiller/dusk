@@ -48,12 +48,12 @@ class TestUsers:
         with raises(users.UserConstraintError):
             users.create("test3", "password3", (1, None))
 
-    def test_info_valid(self, users: Users) -> None:
+    def test_get_valid(self, users: Users) -> None:
         info = users.get(username="test1")
         assert info != None
         assert info["id"] == 1
 
-    def test_info_invalid(self, users: Users) -> None:
+    def test_get_invalid(self, users: Users) -> None:
         assert users.get(username="invalid") is None
 
     def test_exists_valid(self, users: Users) -> None:
@@ -130,12 +130,12 @@ class TestInvites:
         with raises(invites.OwnerNotFoundError):
             invites.create(0)
 
-    def test_info_valid(self, invites: Invites, invite: str) -> None:
+    def test_get_valid(self, invites: Invites, invite: str) -> None:
         info = invites.get(code=invite)
         assert info != None
         assert info["id"] == 1
 
-    def test_info_invalid(self, invites: Invites) -> None:
+    def test_get_invalid(self, invites: Invites) -> None:
         assert invites.get(code="invalid") is None
 
     def test_exists_valid(self, invites: Invites, invite: str) -> None:
@@ -200,12 +200,12 @@ class TestTokens:
         with raises(tokens.OwnerNotFoundError):
             tokens.create(0)
 
-    def test_info_valid(self, tokens: Tokens, token: str) -> None:
+    def test_get_valid(self, tokens: Tokens, token: str) -> None:
         info = tokens.get(token=token)
         assert info != None
         assert info["id"] == 1
 
-    def test_info_invalid(self, tokens: Tokens) -> None:
+    def test_get_invalid(self, tokens: Tokens) -> None:
         assert tokens.get(token="invalid") is None
 
     def test_exists_valid(self, tokens: Tokens, token: str) -> None:
