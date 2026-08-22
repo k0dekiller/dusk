@@ -31,7 +31,7 @@ class TestTable:
 def users(conn: Connector) -> Users:
     return Users(conn)
 class TestUsers:
-    def test_create_password_valid(self, users: Users) -> None:
+    def test_create_valid(self, users: Users) -> None:
         users.create("test1", "password1")
 
     def test_create_username_taken(self, users: Users) -> None:
