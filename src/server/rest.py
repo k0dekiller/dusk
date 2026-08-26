@@ -1,9 +1,11 @@
 from collections.abc import Callable
-from typing import Any, Final, Literal
+from typing import Any, Concatenate, Final, Literal
 from functools import wraps
 import inspect
 
 from flask import Response, jsonify, request
+
+from . import db
 
 type body = dict[str, Any]
 type response = Response | tuple[Response | str, int] | str
@@ -63,6 +65,15 @@ def require(*args: str, src: Literal["json"] = "json") -> Callable[..., Callable
                     else:
                         kwargs[name] = param["def"]
             # proceed with original function and pass obtained parameters
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
+def token[err: response, **P, R](tokens: db.Tokens, error: Callable[..., err]) -> Callable[[Callable[P, R]], Callable[Concatenate[str, P], R | err]]:
+    def decorator(f: Callable[P, R]) -> Callable[Concatenate[str, P], R | err]:
+        @wraps(f)
+        def wrapper(token: str, *args: P.args, **kwargs: P.kwargs) -> R | err:
+            if not tokens.valid(token=token):
+                return error()
             return f(*args, **kwargs)
         return wrapper
     return decorator
