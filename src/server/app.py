@@ -1,3 +1,5 @@
+# pyright: reportUnusedClass = false
+
 from collections.abc import Callable
 from sqlite3 import Row
 from typing import Any, cast
@@ -44,6 +46,13 @@ class err:
             params=["username", "password"]
         )), 400
     @staticmethod
+    def invalid_token() -> response:
+        return jsonify(rest.error(
+            rest.err.param.value.invalid,
+            desc=f"Invalid token",
+            params="token"
+        ))
+    @staticmethod
     def invalid_invite() -> response:
         return jsonify(rest.error(
             rest.err.param.value.invalid,
@@ -63,6 +72,8 @@ def app(db_path: str = "data.db") -> Flask:
     app.config["DB_INVITES"] = invites = db.Invites(conn)
     app.config["DB_TOKENS"] = tokens = db.Tokens(conn)
     app.config["SECRET_KEY"] = key
+
+    require_token = rest.token(tokens, err.invalid_token)
 
     class Root:
         path = mkpath()
@@ -114,9 +125,14 @@ def app(db_path: str = "data.db") -> Flask:
 
             return success()
 
-    class Users(Root): # pyright: ignore[reportUnusedClass]
+    class Users(Root):
         path = Root.sub("users")
-        ...
+        @app.post(path("requests"))
+        @rest.require("token", "receiver")
+        @require_token
+        @staticmethod
+        def requests(receiver: str) -> response:
+            ... # TODO
 
     return app
 
