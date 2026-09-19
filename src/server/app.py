@@ -16,52 +16,6 @@ def mkpath(path: str = "") -> Callable[..., str]:
         return f"{path}/{subpath}"
     return p
 
-class err:
-    @staticmethod
-    def invalid(param: str | None) -> response:
-        return jsonify(rest.error(
-            rest.err.param.value.invalid,
-            desc=f"Invalid parameters",
-            params=param
-        )), 400
-    @staticmethod
-    def username_taken() -> response:
-        return jsonify(rest.error(
-            rest.err.param.value.not_unique,
-            desc=f"Username taken",
-            params="username"
-        )), 400
-    @staticmethod
-    def wrong_login() -> response:
-        return jsonify(rest.error(
-            rest.err.param.value.invalid,
-            desc=f"Wrong username or password",
-            params=["username", "password"]
-        )), 400
-    @staticmethod
-    def invalid_login() -> response:
-        return jsonify(rest.error(
-            rest.err.param.value.invalid,
-            desc=f"Invalid username or password",
-            params=["username", "password"]
-        )), 400
-    @staticmethod
-    def invalid_token() -> response:
-        return jsonify(rest.error(
-            rest.err.param.value.invalid,
-            desc=f"Invalid token",
-            params="token"
-        ))
-    @staticmethod
-    def invalid_invite() -> response:
-        return jsonify(rest.error(
-            rest.err.param.value.invalid,
-            desc=f"Invalid invite code",
-            params="invite"
-        )), 400
-def success(data: rest.body | None = None) -> response:
-    return jsonify(rest.success()), 200
-
 def row(row: Any) -> Row:
     return cast(Row, row)
 
@@ -73,7 +27,59 @@ def app(db_path: str = "data.db") -> Flask:
     app.config["DB_TOKENS"] = tokens = db.Tokens(conn)
     app.config["SECRET_KEY"] = key
 
-    require_token = rest.token(tokens, err.invalid_token)
+    class err:
+        @staticmethod
+        def invalid(param: str | None) -> response:
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Invalid parameters",
+                params=param
+            )), 400
+        @staticmethod
+        def username_taken() -> response:
+            return jsonify(rest.error(
+                rest.err.param.value.not_unique,
+                desc=f"Username taken",
+                params="username"
+            )), 400
+        @staticmethod
+        def wrong_login() -> response:
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Wrong username or password",
+                params=["username", "password"]
+            )), 400
+        @staticmethod
+        def invalid_login() -> response:
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Invalid username or password",
+                params=["username", "password"]
+            )), 400
+        @staticmethod
+        def invalid_token() -> response:
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Invalid token",
+                params="token"
+            ))
+        @staticmethod
+        def invalid_invite() -> response:
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Invalid invite code",
+                params="invite"
+            )), 400
+    def success(data: rest.body | None = None) -> response:
+        return jsonify(rest.success(data)), 200
+
+    def token[**P, R](f: Callable[Concatenate[str, P], R]) -> Callable[Concatenate[str, P], R | response]:
+        @wraps(f)
+        def wrapper(token: str, *args: P.args, **kwargs: P.kwargs) -> R | response:
+            if not tokens.valid(token=token):
+                return err.invalid_token()
+            return f(token, *args, **kwargs)
+        return wrapper
 
     class Root:
         path = mkpath()
