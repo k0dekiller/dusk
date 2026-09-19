@@ -7,17 +7,24 @@ class RequestError(Exception):
         self.desc = desc
 
 class Client:
-    class Endpoints:
-        def __init__(self, root: str | None = None) -> None:
-            self.root = root
-            self.login = self.path("/login")
-            self.signup = self.path("/signup")
-        @overload
-        def path(self) -> str: ...
-        @overload
-        def path(self, s: str) -> str: ...
-        def path(self, s: str | None = None) -> str:
-            return (self.root if self.root is not None else "") + (s if s is not None else "")
+    class endpoints:
+        login = "login"
+        signup = "signup"
+        class users:
+            @staticmethod
+            def requests(username: str) -> str:
+                return f"users/{username}/requests"
+    class Users:
+        def __init__(self, client: Client) -> None:
+            self.client = client
+        def __call__(self) -> Client:
+            return self.client
+        def send_request(self, username: str) -> None:
+            r = self().check(rq.post(
+                self().path(self().endpoints.users.requests(username)), json={
+                "token": self().token
+            }))
+            print(r.status_code, r.json())
     @overload
     def __init__(self, server: str, *, token: str) -> None: ...
     @overload
@@ -33,8 +40,9 @@ class Client:
         self.username = username
         self.password = password
         self.token = token
-        self.endpoints = self.Endpoints(self.server)
-        self.path = self.endpoints.path
+        self.users = self.Users(self)
+    def path(self, s: str | None = None) -> str:
+        return self.server + ("" if self.server.endswith("/") else "/") + (s if s is not None else "")
     def check[r: rq.Response](self, r: r) -> r:
         @overload
         def err() -> Never: ...
