@@ -4,4 +4,5 @@
 ```
 /login
 /signup
+/<user>/requests
 ```
