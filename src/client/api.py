@@ -72,16 +72,16 @@ class Client:
     @overload
     def signup(self, invite: str | None) -> None: ...
     def signup(self, invite: str | None) -> None:
-        r = self.check(rq.post(self.endpoints.signup, json={
+        self.check(rq.post(self.path(self.endpoints.signup), json={
             "invite": invite,
             "username": self.username,
             "password": self.password
         }))
-        print(r.status_code, r.json())
 
-    def login(self) -> None:
-        r = self.check(rq.post(self.endpoints.login, json={
+    def login(self) -> str:
+        r = self.check(rq.post(self.path(self.endpoints.login), json={
             "username": self.username,
             "password": self.password
         }))
-        print(r.status_code, r.json())
+        self.token = r.json()["data"]["token"]
+        return self.token
