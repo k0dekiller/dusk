@@ -68,12 +68,3 @@ def require(*args: str, src: Literal["json"] = "json") -> Callable[..., Callable
             return f(*args, **kwargs)
         return wrapper
     return decorator
-def token[err: response, **P, R](tokens: db.Tokens, error: Callable[..., err]) -> Callable[[Callable[P, R]], Callable[Concatenate[str, P], R | err]]:
-    def decorator(f: Callable[P, R]) -> Callable[Concatenate[str, P], R | err]:
-        @wraps(f)
-        def wrapper(token: str, *args: P.args, **kwargs: P.kwargs) -> R | err:
-            if not tokens.valid(token=token):
-                return error()
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
