@@ -85,7 +85,7 @@ def app(db_path: str = "data.db") -> Flask:
     class Root:
         path = mkpath()
         @classmethod
-        def sub(cls, path: str = "") -> Callable[..., str]:
+        def sub(cls, path: str = "") -> Callable[[str], str]:
             return mkpath(cls.path(path))
 
         @app.post(path("login"))
