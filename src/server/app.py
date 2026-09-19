@@ -134,9 +134,9 @@ def app(db_path: str = "data.db") -> Flask:
 
     class Users(Root):
         path = Root.sub("users")
-        @app.post(path("requests"))
-        @rest.require("token", "receiver")
-        @require_token
+        @app.post(path("<receiver>/requests"))
+        @rest.require("token")
+        @token
         @staticmethod
         def requests(receiver: str) -> response:
             ... # TODO
