@@ -2,7 +2,8 @@
 
 from collections.abc import Callable
 from sqlite3 import Row
-from typing import Any, cast
+from typing import Any, Concatenate, cast
+from functools import wraps
 from flask import Flask, jsonify
 
 from . import rest
