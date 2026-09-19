@@ -52,7 +52,7 @@ def require(*args: str, src: Literal["json"] = "json") -> Callable[..., Callable
                     else:
                         return jsonify(error(
                             err.param.value.invalid_type,
-                            desc = f"Parameter {repr(name)} is {repr(type(value))}, expected {repr(param["type"])}",
+                            desc = f"Parameter \"{name}\" is {type(value).__name__ if value is not None else "missing"}, expected {param["type"].__name__}",
                             params = name
                         )), 400
                 else:
