@@ -1,8 +1,5 @@
 import os
 
-class KeyNotFoundError(Exception):
-    pass
-
 file = f"key.bin"
 key = b""
 
