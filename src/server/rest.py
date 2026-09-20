@@ -1,5 +1,7 @@
+"""Provides tools that simplify REST API management."""
+
 from collections.abc import Callable
-from typing import Any, Final, Literal
+from typing import Any, Final, Literal, overload
 from functools import wraps
 import inspect
 
@@ -9,19 +11,31 @@ type body = dict[str, Any]
 type response = Response | tuple[Response | str, int] | str
 
 class err:
+    """The namespace that contains all the error codes."""
     class param:
+        """The namespace that contains all parameter-related error codes."""
         missing: Final = "param.missing"
         class value:
+            """The namespace that contains all value-related error codes."""
             invalid: Final = "param.value.invalid"
             invalid_type: Final = "param.value.invalid_type"
             not_unique: Final = "param.value.not_unique"
 
 def result(success: bool, body: body) -> body:
+    """Adds the `success` key to the given `body` and returns it."""
     body["success"] = success
     return body
+@overload
+def success() -> body:
+    """Adds the `"success": True` key to a new body and returns it."""
+@overload
+def success(data: body) -> body:
+    """Adds the `"success": True` key to the given `body` and returns it."""
 def success(data: body | None = None) -> body:
+    """Adds the `"success": True` key to the given `body` (or creates a new one if not given) and returns it."""
     return result(True, {"data": data} if data is not None else {})
 def error(code: str, *, desc: str | None = None, params: list[str] | str | None = None) -> body:
+    """Returns a new body with the `code`, `desc` and `params` keys."""
     body: body = {"code": code}
     if desc is not None:
         body["desc"] = desc
@@ -29,6 +43,7 @@ def error(code: str, *, desc: str | None = None, params: list[str] | str | None 
         body["params"] = params if isinstance(params, list) else [params]
     return result(False, {"error": body})
 def require(*args: str, src: Literal["json"] = "json") -> Callable[..., Callable[..., response]]:
+    """Generates a wrapper that checks if all arguments `args` are present in the given source `src`, and returns an error if not."""
     def decorator(f: Callable[..., response]) -> Callable[..., response]:
         def _params(f: Callable[..., Any]) -> dict[str, Any]:
             all = inspect.signature(f).parameters
