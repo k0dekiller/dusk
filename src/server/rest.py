@@ -1,11 +1,9 @@
 from collections.abc import Callable
-from typing import Any, Concatenate, Final, Literal
+from typing import Any, Final, Literal
 from functools import wraps
 import inspect
 
 from flask import Response, jsonify, request
-
-from . import db
 
 type body = dict[str, Any]
 type response = Response | tuple[Response | str, int] | str
