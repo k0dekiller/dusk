@@ -126,3 +126,8 @@ class TestLogin:
     def test_invalid(self) -> None:
         with error("param.value.invalid", ["username", "password"]):
             new_client("username", "password").login()
+
+class TestUsers:
+    class TestRequests:
+        def test_invalid_token(self) -> None:
+            pass # TODO
