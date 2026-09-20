@@ -1,8 +1,6 @@
 from ..utils import *
 from .imports import *
 
-class NoConnectionException(Exception):
-    pass
 class NoRowsAffectedError(Exception):
     pass
 
