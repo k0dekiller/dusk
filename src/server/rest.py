@@ -1,5 +1,3 @@
-"""Provides tools that simplify REST API management."""
-
 from collections.abc import Callable
 from typing import Any, Final, Literal, overload
 from functools import wraps

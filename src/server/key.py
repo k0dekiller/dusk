@@ -1,5 +1,3 @@
-"""Provides tools that simplify key management."""
-
 import os
 
 file = f"key.bin"

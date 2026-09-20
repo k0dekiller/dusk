@@ -1,5 +1,3 @@
-"""Provides tools for regex-based string validation."""
-
 from collections.abc import Callable
 import re
 
@@ -23,4 +21,4 @@ class Validator:
         return repr(self.r)
 
 username = Validator(r"[a-z][0-9a-z_]{3,15}")
-password = Validator(r".{8,}")
+password = Validator(r".{8,}") # TODO

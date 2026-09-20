@@ -1,5 +1,3 @@
-"""API for the backend's REST API."""
-
 from typing import Any, Never, overload
 import requests as rq
 
