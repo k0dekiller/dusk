@@ -85,7 +85,7 @@ class Client:
     def signup(self, invite: str) -> None:
         """Signs up `self` by consuming a specified `invite`."""
     @overload
-    def signup(self, invite: None = None) -> None:
+    def signup(self) -> None:
         """Signs up `self` without consuming an invite."""
     def signup(self, invite: str | None = None) -> None:
         """Signs up `self`."""
