@@ -105,12 +105,12 @@ def app(db_path: str = "data.db") -> Flask:
         @rest.require("username", "password", "invite")
         @staticmethod
         def signup(username: str, password: str, invite: str) -> response:
-            # check if invite is valid
-            if not (invites.valid(code=invite)):
-                return err.invalid_invite()
             # check if username and password are valid
             if not (v.username(username) and v.password(password)):
                 return err.invalid_login()
+            # check if invite is valid
+            if not (invites.valid(code=invite)):
+                return err.invalid_invite()
             # check if username is taken
             if users.exists(username=username):
                 return err.username_taken()
