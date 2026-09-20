@@ -138,8 +138,8 @@ def app(db_path: str = "data.db") -> Flask:
         @rest.require("token")
         @token
         @staticmethod
-        def requests(receiver: str) -> response:
-            ... # TODO
+        def requests(token: str, receiver: str) -> response:
+            return success({"token": token, "receiver": receiver})
 
     return app
 
