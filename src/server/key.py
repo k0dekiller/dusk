@@ -16,3 +16,5 @@ else:
         k = f.read()
         if len(k) != 32: gen()
         else: key = k
+
+# TODO: convert to class
