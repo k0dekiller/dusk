@@ -32,8 +32,8 @@ class Relationships(Table):
     @overload#1
     def create(self, sender: int, receiver: int, type: rq_type) -> None: ...
     @overload#2
-    def create(self, sender: int, receiver: int, type: rq_type | None) -> None: ...
-    def create(self, sender: int, receiver: int, type: rq_type | None) -> None:
+    def create(self, sender: int, receiver: int) -> None: ...
+    def create(self, sender: int, receiver: int, type: rq_type | None = None) -> None:
         self.utils.create(sender=sender, receiver=receiver, created_at=now(), **(over(
             friends_since=now() if type == "friends" else None,
             blocked_since=now() if type == "blocked" else None,
