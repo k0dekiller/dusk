@@ -11,6 +11,7 @@ class Relationships(Table):
         pass
     class ForeignConstraintError(Table.ForeignConstraintError):
         pass
+    type rq_type = Literal["friends", "blocked"]
     def __init__(self, conn: Connector) -> None:
         super().__init__(conn, self.Errors(
             self.RelationshipNotFoundError,
@@ -28,8 +29,15 @@ class Relationships(Table):
             friends_since="TEXT",
             blocked_since="TEXT"
         )
-    def create(self, sender: int, receiver: int) -> None:
-        self.utils.create(sender=sender, receiver=receiver, created_at=now())
+    @overload#1
+    def create(self, sender: int, receiver: int, type: rq_type) -> None: ...
+    @overload#2
+    def create(self, sender: int, receiver: int, type: rq_type | None) -> None: ...
+    def create(self, sender: int, receiver: int, type: rq_type | None) -> None:
+        self.utils.create(sender=sender, receiver=receiver, created_at=now(), **(over(
+            friends_since=now() if type == "friends" else None,
+            blocked_since=now() if type == "blocked" else None,
+        )) if type is not None else {})
     @overload#1
     def get(self, *, id: int) -> Row | None: ...
     @overload#2
