@@ -41,34 +41,34 @@ class Tokens(Table):
     @overload#2
     def get(self, *, id: int) -> Row | None: ...
     def get(self, *, token: str | None = None, id: int | None = None) -> Row | None:
-        return self.utils.get_sv(over(token_hash=hash(token), id=id))
+        return self.utils.get(over(token_hash=hash(token), id=id))
     @overload#1
     def exists(self, *, token: str) -> bool: ...
     @overload#2
     def exists(self, *, id: int) -> bool: ...
     def exists(self, *, token: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(token_hash=hash(token), id=id))
+        return self.utils.any(over(token_hash=hash(token), id=id))
     @overload#1
     def valid(self, *, token: str) -> bool: ...
     @overload#2
     def valid(self, *, id: int) -> bool: ...
     def valid(self, *, token: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(token_hash=hash(token), id=id), arch=False)
+        return self.utils.any(over(token_hash=hash(token), id=id), arch=False)
     @overload#1
     def archived(self, *, token: str) -> bool: ...
     @overload#2
     def archived(self, *, id: int) -> bool: ...
     def archived(self, *, token: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(token_hash=hash(token), id=id), arch=True)
+        return self.utils.any(over(token_hash=hash(token), id=id), arch=True)
     @overload#1
     def set(self, *, token: str, **kwargs: Any) -> None: ...
     @overload#2
     def set(self, *, id: int, **kwargs: Any) -> None: ...
     def set(self, *, token: str | None = None, id: int | None = None, **kwargs: Any) -> None:
-        self.utils.set_sv(over(token_hash=hash(token), id=id), kwargs)
+        self.utils.set(over(token_hash=hash(token), id=id), kwargs)
     @overload#1
     def delete(self, *, token: str, hard: bool = False) -> None: ...
     @overload#2
     def delete(self, *, id: int, hard: bool = False) -> None: ...
     def delete(self, *, token: str | None = None, id: int | None = None, hard: bool = False) -> None:
-        self.utils.delete_sv(over(token_hash=hash(token), id=id), hard=hard)
+        self.utils.delete(over(token_hash=hash(token), id=id), hard=hard)

@@ -42,34 +42,34 @@ class Invites(Table):
     @overload#2
     def get(self, *, id: int) -> Row | None: ...
     def get(self, *, code: str | None = None, id: int | None = None) -> Row | None:
-        return self.utils.get_sv(over(code=code, id=id))
+        return self.utils.get(over(code=code, id=id))
     @overload#1
     def exists(self, *, code: str) -> bool: ...
     @overload#2
     def exists(self, *, id: int) -> bool: ...
     def exists(self, *, code: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(code=code, id=id))
+        return self.utils.any(over(code=code, id=id))
     @overload#1
     def valid(self, *, code: str) -> bool: ...
     @overload#2
     def valid(self, *, id: int) -> bool: ...
     def valid(self, *, code: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(code=code, id=id), arch=False)
+        return self.utils.any(over(code=code, id=id), arch=False)
     @overload#1
     def archived(self, *, code: str) -> bool: ...
     @overload#2
     def archived(self, *, id: int) -> bool: ...
     def archived(self, *, code: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(code=code, id=id), arch=True)
+        return self.utils.any(over(code=code, id=id), arch=True)
     @overload#1
     def set(self, *, code: str, **kwargs: Any) -> None: ...
     @overload#2
     def set(self, *, id: int, **kwargs: Any) -> None: ...
     def set(self, *, code: str | None = None, id: int | None = None, **kwargs: Any) -> None:
-        self.utils.set_sv(over(code=code, id=id), kwargs)
+        self.utils.set(over(code=code, id=id), kwargs)
     @overload#1
     def delete(self, *, code: str, hard: bool = False) -> None: ...
     @overload#2
     def delete(self, *, id: int, hard: bool = False) -> None: ...
     def delete(self, *, code: str | None = None, id: int | None = None, hard: bool = False) -> None:
-        self.utils.delete_sv(over(code=code, id=id), hard=hard)
+        self.utils.delete(over(code=code, id=id), hard=hard)

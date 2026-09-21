@@ -44,19 +44,19 @@ class Relationships(Table):
             receiver: int | None = None
         ) -> list[Row] | Row | None:
         if id is not None:
-            return self.utils.get_sv(over(id=id))
+            return self.utils.get(over(id=id))
         if sender is not None and receiver is not None:
-            return self.utils.get_sv(over(sender=sender, receiver=receiver))
-        return self.utils.get_sv(over(sender=sender, receiver=receiver), fetch="all")
+            return self.utils.get(over(sender=sender, receiver=receiver))
+        return self.utils.get(over(sender=sender, receiver=receiver), fetch="all")
     @overload#1
     def exists(self, *, id: int) -> bool: ...
     @overload#2
     def exists(self, *, sender: int, receiver: int) -> bool: ...
     def exists(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None) -> bool:
-        return self.utils.any_sv(over(id=id, sender=sender, receiver=receiver))
+        return self.utils.any(over(id=id, sender=sender, receiver=receiver))
     @overload#1
     def set(self, *, id: int, **kwargs: Any) -> None: ...
     @overload#2
     def set(self, *, sender: int, receiver: int, **kwargs: Any) -> None: ...
     def set(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None, **kwargs: Any) -> None:
-        self.utils.set_sv(over(id=id, sender=sender, receiver=receiver), kwargs)
+        self.utils.set(over(id=id, sender=sender, receiver=receiver), kwargs)

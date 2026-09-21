@@ -48,38 +48,38 @@ class Users(Table):
     @overload#2
     def get(self, *, id: int) -> Row | None: ...
     def get(self, *, username: str | None = None, id: int | None = None) -> Row | None:
-        return self.utils.get_sv(over(username=username, id=id))
+        return self.utils.get(over(username=username, id=id))
     @overload#1
     def exists(self, *, username: str) -> bool: ...
     @overload#2
     def exists(self, *, id: int) -> bool: ...
     def exists(self, *, username: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(username=username, id=id))
+        return self.utils.any(over(username=username, id=id))
     @overload#1
     def valid(self, *, username: str) -> bool: ...
     @overload#2
     def valid(self, *, id: int) -> bool: ...
     def valid(self, *, username: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(username=username, id=id), arch=False)
+        return self.utils.any(over(username=username, id=id), arch=False)
     @overload#1
     def archived(self, *, username: str) -> bool: ...
     @overload#2
     def archived(self, *, id: int) -> bool: ...
     def archived(self, *, username: str | None = None, id: int | None = None) -> bool:
-        return self.utils.any_sv(over(username=username, id=id), arch=True)
+        return self.utils.any(over(username=username, id=id), arch=True)
     @overload#1
     def set(self, *, username: str, **kwargs: Any) -> None: ...
     @overload#2
     def set(self, *, id: int, **kwargs: Any) -> None: ...
     def set(self, *, username: str | None = None, id: int | None = None, **kwargs: Any) -> None:
-        self.utils.set_sv(over(username=username, id=id), kwargs)
+        self.utils.set(over(username=username, id=id), kwargs)
     @overload#1
     def delete(self, *, username: str, hard: bool = False) -> None: ...
     @overload#2
     def delete(self, *, id: int, hard: bool = False) -> None: ...
     def delete(self, *, username: str | None = None, id: int | None = None, hard: bool = False) -> None:
-        self.utils.delete_sv(over(username=username, id=id), hard=hard)
+        self.utils.delete(over(username=username, id=id), hard=hard)
     def login(self, username: str, password: str) -> bool:
-        row = self.utils.get_sv(over(username=username), arch=False)
+        row = self.utils.get(over(username=username), arch=False)
         if row is None: return False
         return argon_verify(row["password_hash"], password)

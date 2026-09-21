@@ -2,10 +2,12 @@ from ..utils import *
 from .imports import *
 
 class NoRowsAffectedError(Exception):
-    pass
+    """Raised according to the conventions defined in `/docs/database.md#Idempotency`."""
 
 class Table:
+    """The abstract class that provides tools to simplify database operations."""
     class Errors:
+        """The class that holds the collection of custom errors raised by `Table` subclasses."""
         def __init__(self,
                 not_found: type[Exception],
                 conflict: type[Exception],
@@ -24,6 +26,7 @@ class Table:
             self.create_constraint = default(create_constraint, constraint)
             self.create_foreign_constraint = default(create_foreign_constraint, constraint)
     class Utils:
+        """Provides tools that simplify database queries."""
         type kwargs_t = dict[str, Any]
         type optdefault = str | bool | None
         type fetch_one = Literal["one"]
@@ -41,31 +44,37 @@ class Table:
         def __call__(self) -> Table:
             return self._self
         def where(self, cond: str | None = None) -> str:
+            """Returns the assembled `WHERE` clause with the condition `cond`, or an empty string if it's `None`."""
             return f" WHERE {cond}" if cond is not None else ""
-        def sv[R](
+        def assemble[R](
                 self,
                 func: LiveQuery[R],
-                sv: kwargs_t, q: str | None = None, *v: Any,
+                args: kwargs_t, q: str | None = None, *v: Any,
                 arch: optdefault = None
             ) -> R:
+            """Assembles a query depending on the given `LiveQuery` function `func`."""
             if isinstance(arch, bool): arch = f"{"!" if arch else ""}{self.arch}"
             if isinstance(arch, str) and arch.startswith("!"):
                 arch = arch[1:]
                 archinv = True
             else: archinv = False
             return func(""
-                + (" AND ".join(f"{k} = ?" for k in sv.keys()))
+                + (" AND ".join(f"{k} = ?" for k in args.keys()))
                 + (f" AND {arch} IS {" NOT " if archinv else ""}NULL" if arch is not None else "")
                 + (f" {q}" if q is not None else ""),
-                *sv.values(), *v
+                *args.values(), *v
             )
         @overload
-        def exec(self, query: str, *v: Any, fetch: Literal["one"]) -> Row | None: ...
+        def exec(self, query: str, *v: Any, fetch: Literal["one"]) -> Row | None:
+            """Executes the query `query`, fetches one row and returns it."""
         @overload
-        def exec(self, query: str, *v: Any, fetch: Literal["all"] | int) -> list[Row]: ...
+        def exec(self, query: str, *v: Any, fetch: Literal["all"] | int) -> list[Row]:
+            """Executes the query `query`, fetches all rows and returns them."""
         @overload
-        def exec(self, query: str, *v: Any, fetch: None = None) -> int: ...
+        def exec(self, query: str, *v: Any, fetch: None = None) -> int:
+            """Executes the query `query` and returns the number of affected rows."""
         def exec(self, query: str, *v: Any, fetch: optfetch_mode = None) -> optfetch_result:
+            """Executes the query `query` and returns the result according to the fetch mode `fetch`."""
             @self().run
             def op(c: Cursor) -> Table.Utils.optfetch_result:
                 c.execute(query, v)
@@ -76,6 +85,13 @@ class Table:
                     case _: return c.fetchmany() # -> list[Row]
             return op
         def init(self, **kwargs: str) -> None:
+            """
+            Initializes a new table from the given `kwargs` with the following rules:
+
+            1. `<key> = <value>` becomes `<key> <value>`;
+            2. `<key> = <value> -> <foreign>` becomes `<key> <value>` and `FOREIGN KEY (<key>) REFERENCES <foreign>`;
+            3. Prefixing a key with `check_` turns it into the constraint `CONSTRAINT <key> CHECK (<value>)`.
+            """
             cols: list[str] = []
             foreign: list[str] = []
             check: list[str] = []
@@ -93,6 +109,7 @@ class Table:
                 ", ".join(cols + foreign + check)
             })", fetch=None)
         def create(self, **kwargs: Any) -> None:
+            """Inserts a row with the given `kwargs`."""
             k, v = zip(*kwargs.items())
             try: self.exec(
                     f"INSERT INTO {self().name} ({", ".join(k)}) VALUES ({", ".join(["?"]*len(kwargs))})",
@@ -109,19 +126,19 @@ class Table:
                     
                 raise
         @overload
-        def get(self, fetch: fetch_one = "one") -> LiveQuery[Row | None]: ...
+        def _get(self, fetch: fetch_one = "one") -> LiveQuery[Row | None]: ...
         @overload
-        def get(self, fetch: fetch_all | int) -> LiveQuery[list[Row]]: ...
-        def get(self, fetch: fetch_mode = "one") -> LiveQuery[fetch_result]:
+        def _get(self, fetch: fetch_all | int) -> LiveQuery[list[Row]]: ...
+        def _get(self, fetch: fetch_mode = "one") -> LiveQuery[fetch_result]:
             def func(q: str | None = None, *v: Any) -> Table.Utils.fetch_result:
                 return self.exec(
                     f"SELECT * FROM {self().name}{self.where(q)}",
                     *v, fetch=fetch
                 )
             return func
-        def any(self, q: str | None = None, *v: Any) -> bool:
-            return self.get(fetch="one")(q, *v) is not None
-        def set(self, set: kwargs_t) -> LiveQuery[None]:
+        def _any(self, q: str | None = None, *v: Any) -> bool:
+            return self._get(fetch="one")(q, *v) is not None
+        def _set(self, set: kwargs_t) -> LiveQuery[None]:
             def func(q: str | None = None, *v: Any) -> None:
                 self.exec(
                     f"UPDATE {self().name} SET {", ".join(f"{key} = ?" for key in set.keys())}{self.where(q)}",
@@ -129,10 +146,10 @@ class Table:
                 )
             return func
         @overload
-        def delete(self, hard: Literal[True]) -> LiveQuery[None]: ...
+        def _delete(self, hard: Literal[True]) -> LiveQuery[None]: ...
         @overload
-        def delete(self, hard: Literal[False], arch: str | None = None) -> LiveQuery[None]: ...
-        def delete(self, hard: bool = False, arch: str | None = None) -> LiveQuery[None]:
+        def _delete(self, hard: Literal[False], arch: str | None = None) -> LiveQuery[None]: ...
+        def _delete(self, hard: bool = False, arch: str | None = None) -> LiveQuery[None]:
             def func(q: str | None = None, *v: Any) -> None:
                 nonlocal arch
                 if arch is None: arch = self.arch
@@ -147,26 +164,36 @@ class Table:
                     raise self.errors.not_found
             return func
         @overload
-        def get_sv(self, sv: kwargs_t, fetch: fetch_one = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> Row | None: ...
+        def get(self, args: kwargs_t, fetch: fetch_one = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> Row | None: ...
         @overload
-        def get_sv(self, sv: kwargs_t, fetch: fetch_all | int, q: str | None = None, *v: Any, arch: optdefault = None) -> list[Row]: ...
-        def get_sv(self, sv: kwargs_t, fetch: fetch_mode = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> fetch_result:
-            return self.sv(self.get(fetch), sv, q, *v, arch=arch)
-        def any_sv(self, sv: kwargs_t, q: str | None = None, *v: Any, arch: optdefault = None) -> bool:
-            return self.sv(self.any, sv, q, *v, arch=arch)
-        def delete_sv(self, sv: kwargs_t, hard: bool = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
-            return self.sv(self.delete(hard=hard), sv, q, *v, arch=arch)
-        def set_sv(self, sv: kwargs_t, set: kwargs_t, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
-            return self.sv(self.set(set), sv, q, *v, arch=arch)
+        def get(self, args: kwargs_t, fetch: fetch_all | int, q: str | None = None, *v: Any, arch: optdefault = None) -> list[Row]: ...
+        def get(self, args: kwargs_t, fetch: fetch_mode = "one", q: str | None = None, *v: Any, arch: optdefault = None) -> fetch_result:
+            """Selects rows and returns the results."""
+            return self.assemble(self._get(fetch), args, q, *v, arch=arch)
+        def any(self, args: kwargs_t, q: str | None = None, *v: Any, arch: optdefault = None) -> bool:
+            """Returns `True` if selecting rows returns at least one result."""
+            return self.assemble(self._any, args, q, *v, arch=arch)
+        def set(self, args: kwargs_t, set: kwargs_t, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
+            """Updates rows according to `set`."""
+            return self.assemble(self._set(set), args, q, *v, arch=arch)
+        @overload
+        def delete(self, args: kwargs_t, hard: Literal[True] = True, q: str | None = None, *v: Any) -> None:
+            """Deletes rows."""
+        @overload
+        def delete(self, args: kwargs_t, hard: Literal[False] = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
+            """Archives rows."""
+        def delete(self, args: kwargs_t, hard: bool = False, q: str | None = None, *v: Any, arch: optdefault = None) -> None:
+            """Deletes or archives rows."""
+            return self.assemble(self._delete(hard=hard), args, q, *v, arch=arch)
     name: str
     class ResourceNotFoundError(NoRowsAffectedError):
-        pass
+        """Raised whenever a query doesn't affect any rows because the target resource doesn't exist."""
     class ResourceConstraintError(NoRowsAffectedError):
-        pass
+        """Raised whenever a query doesn't affect any rows because it doesn't satisfy a constraint."""
     class ForeignConstraintError(ResourceConstraintError):
-        pass
+        """Raised whenever a query doesn't affect any rows because it doesn't satisfy a foreign key constraint."""
     class ResourceAlreadyExistsError(ResourceConstraintError):
-        pass
+        """Raised whenever a query doesn't affect any rows because the inserted row already exists."""
     def __init__(self, conn: Connector, errors: Errors | None = None) -> None:
         self.conn = conn
         if errors is None: errors = self.Errors(
@@ -177,13 +204,14 @@ class Table:
         )
         self.utils = self.Utils(self, errors)
     def run[R](self, f: Callable[[Cursor], R]) -> R:
+        """Returns the result of the function `f` while managing its passed `sqlite3.Cursor` object."""
         conn = self.conn.new()
         c = conn.cursor()
         try:
             result = f(c)
             conn.commit()
             return result
-        except Exception:
+        except:
             conn.rollback()
             raise
         finally:
