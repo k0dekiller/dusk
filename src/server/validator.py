@@ -21,4 +21,4 @@ class Validator:
         return repr(self.r)
 
 username = Validator(r"[a-z][0-9a-z_]{3,15}")
-password = Validator(r"(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,256}") # TODO
+password = Validator(r"(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,256}")
