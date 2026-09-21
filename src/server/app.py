@@ -186,11 +186,12 @@ def app(db_path: str = "data.db") -> Flask:
     class Users(Root):
         """Defines the endpoint handlers for `/users`."""
         path = Root.sub("users")
-        @app.post(path("<receiver>/requests"))
+
+        @app.post(path("<receiver>/friend"))
         @rest.require("token")
         @token
         @staticmethod
-        def requests(token: str, receiver: str) -> response:
+        def friend(token: str, receiver: str) -> response:
             """Handles user friend requests."""
             return success({"token": token, "receiver": receiver})
 
