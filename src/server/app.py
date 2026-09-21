@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from sqlite3 import Row
-from typing import Any, Concatenate
+from typing import Any, Concatenate, cast
 from functools import wraps
 from flask import Flask, jsonify
 
@@ -86,13 +86,14 @@ def app(db_path: str = "data.db") -> Flask:
         """Returns a successful response with optional additional data."""
         return jsonify(rest.success(data)), 200
 
-    def token[**P, R](f: Callable[Concatenate[str, P], R]) -> Callable[Concatenate[str, P], R | response]:
+    def token[**P, R](f: Callable[P, R]) -> Callable[P, R | response]:
         """Checks if the function `f`'s `token` is valid before running it and returning the result."""
         @wraps(f)
-        def wrapper(token: str, *args: P.args, **kwargs: P.kwargs) -> R | response:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | response:
+            token: str = cast(str, kwargs["token"])
             if not tokens.valid(token=token):
                 return err.invalid_token()
-            return f(token, *args, **kwargs)
+            return f(*args, **kwargs)
         return wrapper
 
     class Root:
