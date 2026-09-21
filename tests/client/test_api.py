@@ -69,7 +69,7 @@ def username() -> str:
     return "test1"
 @fixture(scope="session")
 def password() -> str:
-    return "password1"
+    return "Password1!"
 def new_client(username: str, password: str) -> Client:
     return Client(f"http://{host}:{port}", username=username, password=password)
 @fixture(scope="session")
@@ -105,7 +105,7 @@ class TestSignup:
 
     def test_limit(self, invite: str) -> None:
         with error("param.value.invalid", "invite"):
-            new_client("test2", "password2").signup(invite)
+            new_client("test2", "Password2!").signup(invite)
 
     def test_invite_invalid(self, client: Client) -> None:
         with error("param.value.invalid", "invite"):
