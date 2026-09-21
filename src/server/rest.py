@@ -18,6 +18,9 @@ class err:
             invalid: Final = "param.value.invalid"
             invalid_type: Final = "param.value.invalid_type"
             not_unique: Final = "param.value.not_unique"
+    class resource:
+        """The namespace that contains all resource-related error codes."""
+        already_exists: Final = "param.resource.already_exists"
 
 def result(success: bool, body: body) -> body:
     """Adds the `success` key to the given `body` and returns it."""
