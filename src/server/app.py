@@ -51,6 +51,14 @@ def app(db_path: str = "data.db") -> Flask:
                 params="username"
             )), 400
         @staticmethod
+        def wrong_username() -> response:
+            """Returns an error response specifying that the specified user doesn't exist."""
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Wrong username",
+                params="username"
+            ))
+        @staticmethod
         def wrong_login() -> response:
             """Returns an error response specifying that the specified username and password don't match an existing user."""
             return jsonify(rest.error(
@@ -58,6 +66,14 @@ def app(db_path: str = "data.db") -> Flask:
                 desc=f"Wrong username or password",
                 params=["username", "password"]
             )), 400
+        @staticmethod
+        def invalid_username() -> response:
+            """Returns an error response specifying that the specified username is not valid."""
+            return jsonify(rest.error(
+                rest.err.param.value.invalid,
+                desc=f"Invalid username",
+                params="username"
+            ))
         @staticmethod
         def invalid_login() -> response:
             """Returns an error response specifying that the specified username and password are not valid."""
@@ -87,14 +103,31 @@ def app(db_path: str = "data.db") -> Flask:
         return jsonify(rest.success(data)), 200
 
     def token[**P, R](f: Callable[P, R]) -> Callable[P, R | response]:
-        """Checks if the function `f`'s `token` is valid before running it and returning the result."""
+        """Checks if the function's `token` argument is valid before running it and returning the result."""
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | response:
-            token: str = cast(str, kwargs["token"])
+            token = cast(str, kwargs["token"])
             if not tokens.valid(token=token):
                 return err.invalid_token()
             return f(*args, **kwargs)
         return wrapper
+
+    def user[**P, R](*usernames: str) -> Callable[[Callable[P, R]], Callable[P, R | response]]:
+        """Checks if the function's specified arguments' values are valid users before running it and returning the result."""
+        def w(f: Callable[P, R]) -> Callable[P, R | response]:
+            @wraps(f)
+            def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | response:
+                for username in usernames:
+                    username = cast(str, kwargs[username])
+                    # check if username is valid
+                    if not v.username(username):
+                        return err.invalid_username()
+                    # check if username exists
+                    if not users.valid(username=username):
+                        return err.invalid_username()
+                return f(*args, **kwargs)
+            return wrapper
+        return w
 
     class Root:
         """Defines the endpoint handlers for `/`."""
