@@ -25,11 +25,12 @@ def row(row: Any) -> Row:
 def app(db_path: str = "data.db") -> Flask:
     """App factory; configures and returns a new `Flask` app."""
     app = Flask(__name__)
-    app.config["DB_CONN"] = conn = db.Connector(db_path)
-    app.config["DB_USERS"] = users = db.Users(conn)
-    app.config["DB_INVITES"] = invites = db.Invites(conn)
-    app.config["DB_TOKENS"] = tokens = db.Tokens(conn)
-    app.config["SECRET_KEY"] = key
+    app.config["DB_CONN"]           = conn          = db.Connector(db_path)
+    app.config["DB_USERS"]          = users         = db.Users(conn)
+    app.config["DB_INVITES"]        = invites       = db.Invites(conn)
+    app.config["DB_RELATIONSHIPS"]  = relationships = db.Relationships(conn)
+    app.config["DB_TOKENS"]         = tokens        = db.Tokens(conn)
+    app.config["SECRET_KEY"]        = key
 
     class err:
         """The namespace that contains all the error functions."""
