@@ -94,3 +94,11 @@ class Client:
         """Raises `LoginRequiredError` if `self.token` is `None`."""
         if self.token is None:
             raise LoginRequiredError
+
+    def friend(self, username: str, friend: bool) -> None:
+        """Sets the user `username` as a friend if `friend` is `True`, or removes it otherwise."""
+        self.require_token()
+        self.check(rq.post(self.path(self.endpoints.users.friend(username)), json={
+            "token": self.token,
+            "friend": friend
+        }))

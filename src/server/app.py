@@ -213,8 +213,13 @@ def app(db_path: str = "data.db") -> Flask:
         @user("receiver")
         @staticmethod
         def friend(token: str, receiver: str) -> response:
-            """Handles user friend requests."""
-            return success({"token": token, "receiver": receiver})
+            """Handles user friend settings."""
+            return Users._relationship(
+                token,
+                receiver,
+                "friend",
+                "Receiver is already a friend"
+            )
 
     return app
 
