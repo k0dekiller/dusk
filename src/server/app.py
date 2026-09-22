@@ -219,6 +219,18 @@ def app(db_path: str = "data.db") -> Flask:
                 "Receiver is already a friend"
             )
 
+        @app.post(path("<receiver>/block"))
+        @rest.require("token", "value")
+        @token
+        @user("receiver")
+        @staticmethod
+        def block(token: str, receiver: str, v: bool) -> response:
+            """Handles user block settings."""
+            return Users._relationship(
+                token, receiver, "block", v,
+                "Receiver is already blocked"
+            )
+
     return app
 
 if __name__ == "__main__":
