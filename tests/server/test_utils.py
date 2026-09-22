@@ -20,3 +20,6 @@ class TestUtils:
     def test_over_invalid(self) -> None:
         with raises(UnknownOverloadException):
             over(a=None, b=None)
+
+    def test_argon_hash_none(self) -> None:
+        assert argon_hash(None) == None
