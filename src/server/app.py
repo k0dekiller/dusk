@@ -9,7 +9,7 @@ from flask import Flask, jsonify
 from . import rest
 from .rest import response
 from . import db
-from .key import key
+from .key import Key
 from . import validator as v
 
 def mkpath(path: str = "") -> Callable[[str], str]:
@@ -30,7 +30,8 @@ def app(db_path: str = "data.db") -> Flask:
     app.config["DB_INVITES"]        = invites       = db.Invites(conn)
     app.config["DB_RELATIONSHIPS"]  = relationships = db.Relationships(conn)
     app.config["DB_TOKENS"]         = tokens        = db.Tokens(conn)
-    app.config["SECRET_KEY"]        = key
+    app.config["SECRET_KEY_OBJ"]    = key           = Key("key.bin")
+    app.config["SECRET_KEY"]        = key.read()
 
     class err:
         """The namespace that contains all the error functions."""
