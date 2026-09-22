@@ -187,6 +187,26 @@ def app(db_path: str = "data.db") -> Flask:
         """Defines the endpoint handlers for `/users`."""
         path = Root.sub("users")
 
+        @staticmethod
+        def _relationship(token: str, receiver: str, action: str, conflict_desc: str | None) -> response:
+            s: int = row(tokens.get(token=token))["owner"]
+            r: int = row(users.get(username=receiver))["id"]
+            if s == r:
+                return jsonify(rest.error(
+                    rest.err.param.value.invalid,
+                    desc=f"Sender can't also be receiver",
+                    params="username"
+                ))
+            relationship = relationships.get(sender=s, receiver=r)
+            if relationship is not None and relationship[f"{action}_since"] is not None:
+                return jsonify(rest.error(
+                    rest.err.resource.already_exists,
+                    desc=conflict_desc,
+                    params="<receiver>"
+                )), 400
+            relationships.set_friend(s, r, True)
+            return success()
+
         @app.post(path("<receiver>/friend"))
         @rest.require("token")
         @token
