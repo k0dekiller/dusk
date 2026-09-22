@@ -1,2 +1,2 @@
 #!/bin/bash
-pytest . --cov=. --cov-branch --cov-report=term-missing
+python -m pytest . --cov=. --cov-branch --cov-report=term-missing
