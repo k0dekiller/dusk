@@ -7,4 +7,4 @@ CORS(server, resources={
         "origins": ["http://localhost:8080"]
     }
 })
-server.run("localhost", 8080, debug=True)
+server.run("localhost", 3050, debug=True)
