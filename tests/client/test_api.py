@@ -9,7 +9,7 @@ from threading import Thread
 from werkzeug.serving import make_server
 from src.server.app import app as flask
 
-from src.client.api import Client, RequestError
+from src.client.api import Client, RequestError, LoginRequiredError
 
 import os
 
@@ -137,7 +137,16 @@ class TestLogin:
         with error("param.value.invalid", ["username", "password"]):
             new_client("username", "password").login()
 
-class TestUsers:
-    class TestRequests:
-        def test_invalid_token(self) -> None:
-            pass # TODO
+    def test_wrong(self) -> None:
+        with error("param.value.invalid", ["username", "password"]):
+            new_client("username", "Password1!").login()
+
+class TestFriends:
+    def test_add_token_missing(self, client2: Client) -> None:
+        with raises(LoginRequiredError):
+            client2.friend("test1", True)
+
+    def test_add_token_invalid(self, client2: Client) -> None:
+        with error("param.value.invalid", "token"):
+            client2.token = "x"
+            client2.friend("test1", True)
