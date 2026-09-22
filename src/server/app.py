@@ -190,6 +190,7 @@ def app(db_path: str = "data.db") -> Flask:
         @app.post(path("<receiver>/friend"))
         @rest.require("token")
         @token
+        @user("receiver")
         @staticmethod
         def friend(token: str, receiver: str) -> response:
             """Handles user friend requests."""
