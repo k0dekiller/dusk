@@ -15,6 +15,6 @@ class Key:
         """Returns and updates `self.file` to the stored value."""
         with open(self.file, "rb") as f:
             k = f.read()
-            if len(k) != 32: self.gen()
-            else: self.key = k
+        if len(k) != 32: self.gen()
+        else: self.key = k
         return self.key
