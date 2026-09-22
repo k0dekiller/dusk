@@ -63,5 +63,5 @@ Returns `True` if a `Row` object is archived.
     - [x] `sender` **→** `users.id`
     - [x] `receiver` **→** `users.id`
     - [x] `created_at`
-    - [x] `friends_since?`
+    - [x] `friend_since?`
     - [x] `blocked_since?`

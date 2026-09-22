@@ -11,7 +11,7 @@ class Relationships(Table):
         pass
     class ForeignConstraintError(Table.ForeignConstraintError):
         pass
-    type rq_type = Literal["friends", "blocked"]
+    type rq_type = Literal["friend", "blocked"]
     def __init__(self, conn: Connector) -> None:
         super().__init__(conn, self.Errors(
             self.RelationshipNotFoundError,
@@ -26,7 +26,7 @@ class Relationships(Table):
             sender="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
             receiver="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
             created_at="TEXT NOT NULL",
-            friends_since="TEXT",
+            friend_since="TEXT",
             blocked_since="TEXT",
             unique="sender, receiver",
             check_sender_not_receiver="sender <> receiver"
@@ -37,7 +37,7 @@ class Relationships(Table):
     def create(self, sender: int, receiver: int) -> None: ...
     def create(self, sender: int, receiver: int, type: rq_type | None = None) -> None:
         self.utils.create(sender=sender, receiver=receiver, created_at=now(), **(over(
-            friends_since=now() if type == "friends" else None,
+            friend_since=now()  if type == "friend"  else None,
             blocked_since=now() if type == "blocked" else None,
         )) if type is not None else {})
     @overload#1
@@ -70,11 +70,11 @@ class Relationships(Table):
     def set(self, *, sender: int, receiver: int, **kwargs: Any) -> None: ...
     def set(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None, **kwargs: Any) -> None:
         self.utils.set(over(id=id, sender=sender, receiver=receiver), kwargs)
-    def set_friend(self, sender: int, receiver: int, friends: bool) -> None:
+    def set_friend(self, sender: int, receiver: int, friend: bool) -> None:
         if self.exists(sender=sender, receiver=receiver):
-            self.set(sender=sender, receiver=receiver, friends_since=now() if friends else None)
+            self.set(sender=sender, receiver=receiver, friend_since=now() if friend else None)
         else:
-            self.create(sender=sender, receiver=receiver, type="friends")
+            self.create(sender=sender, receiver=receiver, type="friend")
     def set_blocked(self, sender: int, receiver: int, blocked: bool) -> None:
         if self.exists(sender=sender, receiver=receiver):
             self.set(sender=sender, receiver=receiver, blocked_since=now() if blocked else None)

@@ -278,10 +278,10 @@ class TestRelationships:
         with raises(relationships.RelationshipConstraintError):
             relationships.create(0, 0)
 
-    def test_set_friends_valid(self, relationships: Relationships) -> None:
+    def test_set_friend_valid(self, relationships: Relationships) -> None:
         relationships.set_friend(2, 3, True)
 
-    def test_set_friends_again(self, relationships: Relationships) -> None:
+    def test_set_friend_again(self, relationships: Relationships) -> None:
         relationships.set_friend(2, 3, False)
 
     def test_set_blocked_valid(self, relationships: Relationships) -> None:
