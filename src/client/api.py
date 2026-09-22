@@ -18,20 +18,7 @@ class Client:
             @staticmethod
             def requests(username: str) -> str:
                 """Returns the endpoint for the user `username`'s requests."""
-                return f"users/{username}/requests"
-    class Users:
-        """The class used to interact with user-related requests."""
-        def __init__(self, client: Client) -> None:
-            self.client = client
-        def __call__(self) -> Client:
-            return self.client
-        def send_request(self, username: str) -> None:
-            """Sends a friend request to user `username`."""
-            r = self().check(rq.post(
-                self().path(self().endpoints.users.requests(username)), json={
-                "token": self().token
-            }))
-            print(r.status_code, r.json())
+                return f"users/{username}/friend"
     @overload
     def __init__(self, server: str, *, token: str) -> None: ...
     @overload
@@ -47,7 +34,6 @@ class Client:
         self.username = username
         self.password = password
         self.token = token
-        self.users = self.Users(self)
     def path(self, s: str | None = None) -> str:
         """Returns the assembled path by merging `self.server` with `s`."""
         return self.server + ("" if self.server.endswith("/") else "/") + (s if s is not None else "")
@@ -101,3 +87,8 @@ class Client:
         }))
         self.token = r.json()["data"]["token"]
         return self.token
+
+    def require_token(self) -> None:
+        """Raises `LoginRequiredError` if `self.token` is `None`."""
+        if self.token is None:
+            raise LoginRequiredError
