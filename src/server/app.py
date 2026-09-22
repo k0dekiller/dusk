@@ -215,10 +215,7 @@ def app(db_path: str = "data.db") -> Flask:
         def friend(token: str, receiver: str, value: bool) -> response:
             """Handles user friend settings."""
             return Users._relationship(
-                token,
-                receiver,
-                "friend",
-                value,
+                token, receiver, "friend", value,
                 "Receiver is already a friend"
             )
 
