@@ -188,7 +188,7 @@ def app(db_path: str = "data.db") -> Flask:
         path = Root.sub("users")
 
         @staticmethod
-        def _relationship(token: str, receiver: str, action: str, v: bool, conflict_desc: str | None) -> response:
+        def _relationship(token: str, receiver: str, action: str, value: bool, conflict_desc: str | None) -> response:
             s: int = row(tokens.get(token=token))["owner"]
             r: int = row(users.get(username=receiver))["id"]
             if s == r:
@@ -204,7 +204,7 @@ def app(db_path: str = "data.db") -> Flask:
                     desc=conflict_desc,
                     params="<receiver>"
                 )), 400
-            relationships.set_friend(s, r, v)
+            relationships.set_friend(s, r, value)
             return success()
 
         @app.post(path("<receiver>/friend"))
@@ -212,10 +212,10 @@ def app(db_path: str = "data.db") -> Flask:
         @token
         @user("receiver")
         @staticmethod
-        def friend(token: str, receiver: str, v: bool) -> response:
+        def friend(token: str, receiver: str, value: bool) -> response:
             """Handles user friend settings."""
             return Users._relationship(
-                token, receiver, "friend", v,
+                token, receiver, "friend", value,
                 "Receiver is already a friend"
             )
 
@@ -224,10 +224,10 @@ def app(db_path: str = "data.db") -> Flask:
         @token
         @user("receiver")
         @staticmethod
-        def block(token: str, receiver: str, v: bool) -> response:
+        def block(token: str, receiver: str, value: bool) -> response:
             """Handles user block settings."""
             return Users._relationship(
-                token, receiver, "block", v,
+                token, receiver, "block", value,
                 "Receiver is already blocked"
             )
 
