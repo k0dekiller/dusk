@@ -188,7 +188,7 @@ def app(db_path: str = "data.db") -> Flask:
         path = Root.sub("users")
 
         @staticmethod
-        def _relationship(token: str, receiver: str, action: str, conflict_desc: str | None) -> response:
+        def _relationship(token: str, receiver: str, action: str, v: bool, conflict_desc: str | None) -> response:
             s: int = row(tokens.get(token=token))["owner"]
             r: int = row(users.get(username=receiver))["id"]
             if s == r:
@@ -204,20 +204,21 @@ def app(db_path: str = "data.db") -> Flask:
                     desc=conflict_desc,
                     params="<receiver>"
                 )), 400
-            relationships.set_friend(s, r, True)
+            relationships.set_friend(s, r, v)
             return success()
 
         @app.post(path("<receiver>/friend"))
-        @rest.require("token")
+        @rest.require("token", "value")
         @token
         @user("receiver")
         @staticmethod
-        def friend(token: str, receiver: str) -> response:
+        def friend(token: str, receiver: str, value: bool) -> response:
             """Handles user friend settings."""
             return Users._relationship(
                 token,
                 receiver,
                 "friend",
+                value,
                 "Receiver is already a friend"
             )
 
