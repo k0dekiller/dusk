@@ -142,30 +142,30 @@ class TestLogin:
             new_client("username", "Password1!").login()
 
 class TestRelationships:
-    def test_add_token_missing(self, client2: Client) -> None:
+    def test_friend_token_missing(self, client2: Client) -> None:
         with raises(LoginRequiredError):
             client2.friend("test1", True)
 
-    def test_add_token_invalid(self, client2: Client) -> None:
+    def test_friend_token_invalid(self, client2: Client) -> None:
         with error("param.value.invalid", "token"):
             client2.token = "x"
             client2.friend("test1", True)
 
-    def test_add_username_invalid(self, client1: Client) -> None:
+    def test_friend_username_invalid(self, client1: Client) -> None:
         with error("param.value.invalid", "username"):
             client1.friend("x", True)
 
-    def test_add_username_wrong(self, client1: Client) -> None:
+    def test_friend_username_wrong(self, client1: Client) -> None:
         with error("param.value.invalid", "username"):
             client1.friend("test", True)
 
-    def test_add_username_self(self, client1: Client, username1: str) -> None:
+    def test_friend_username_self(self, client1: Client, username1: str) -> None:
         with error("param.value.invalid", "username"):
             client1.friend(username1, True)
 
-    def test_add_valid(self, client1: Client, username2: str) -> None:
+    def test_friend_valid(self, client1: Client, username2: str) -> None:
         client1.friend(username2, True)
 
-    def test_add_again(self, client1: Client, username2: str) -> None:
+    def test_friend_again(self, client1: Client, username2: str) -> None:
         with error("param.resource.already_exists", "<receiver>"):
             client1.friend(username2, True)
