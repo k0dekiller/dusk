@@ -124,7 +124,7 @@ def app(db_path: str = "data.db") -> Flask:
                         return err.invalid_username()
                     # check if username exists
                     if not users.valid(username=username):
-                        return err.invalid_username()
+                        return err.wrong_username()
                 return f(*args, **kwargs)
             return wrapper
         return w
