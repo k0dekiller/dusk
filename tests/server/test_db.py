@@ -262,9 +262,6 @@ class TestTokens:
 def relationships(conn: Connector) -> Relationships:
     return Relationships(conn)
 class TestRelationships:
-    def test_create_valid(self, relationships: Relationships) -> None:
-        relationships.create(2, 3)
-
     def test_create_sender_invalid(self, relationships: Relationships) -> None:
         with raises(relationships.RelationshipConstraintError):
             relationships.create(0, 3)
@@ -273,9 +270,25 @@ class TestRelationships:
         with raises(relationships.RelationshipConstraintError):
             relationships.create(2, 0)
 
+    def test_create_same_invalid(self, relationships: Relationships) -> None:
+        with raises(relationships.RelationshipConstraintError):
+            relationships.create(2, 2)
+
     def test_create_invalid(self, relationships: Relationships) -> None:
         with raises(relationships.RelationshipConstraintError):
             relationships.create(0, 0)
+
+    def test_set_friends_valid(self, relationships: Relationships) -> None:
+        relationships.set_friend(2, 3, True)
+
+    def test_set_friends_again(self, relationships: Relationships) -> None:
+        relationships.set_friend(2, 3, False)
+
+    def test_set_blocked_valid(self, relationships: Relationships) -> None:
+        relationships.set_blocked(2, 3, True)
+
+    def test_set_blocked_again(self, relationships: Relationships) -> None:
+        relationships.set_blocked(2, 3, False)
 
     def test_get_valid(self, relationships: Relationships) -> None:
         info = relationships.get(id=1)
