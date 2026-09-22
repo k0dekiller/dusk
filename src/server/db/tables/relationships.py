@@ -70,9 +70,9 @@ class Relationships(Table):
     def set(self, *, sender: int, receiver: int, **kwargs: Any) -> None: ...
     def set(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None, **kwargs: Any) -> None:
         self.utils.set(over(id=id, sender=sender, receiver=receiver), kwargs)
-    def set_friend(self, sender: int, receiver: int, friend: bool) -> None:
+    def set_friend(self, sender: int, receiver: int, v: bool) -> None:
         if self.exists(sender=sender, receiver=receiver):
-            self.set(sender=sender, receiver=receiver, friend_since=now() if friend else None)
+            self.set(sender=sender, receiver=receiver, friend_since=now() if v else None)
         else:
             self.create(sender=sender, receiver=receiver, type="friend")
     def set_blocked(self, sender: int, receiver: int, blocked: bool) -> None:
