@@ -44,7 +44,7 @@ def default[A, B](value: A | None, default: B) -> A | B:
     return value if value is not None else default
 
 def over(**kwargs: Any) -> dict[str, Any]:
-    """Returns the first argument in `kwargs` which doesn't have a value of `None`."""
+    """Returns the arguments in `kwargs` that don't have a value of `None`."""
     d: dict[str, Any] = {}
     for k, v in kwargs.items():
         if v is None: continue
