@@ -21,6 +21,10 @@ class Client:
             def friend(username: str) -> str:
                 """Returns the endpoint for setting the user `username`'s friend status."""
                 return f"users/{username}/friend"
+            @staticmethod
+            def block(username: str) -> str:
+                """Returns the endpoint for setting the user `username`'s blocked status."""
+                return f"users/{username}/block"
     @overload
     def __init__(self, server: str, *, token: str) -> None: ...
     @overload
@@ -99,6 +103,14 @@ class Client:
         """Sets the user `username` as a friend if `value` is `True`, or removes it otherwise."""
         self.require_token()
         self.check(rq.post(self.path(self.endpoints.users.friend(username)), json={
+            "token": self.token,
+            "value": v
+        }))
+
+    def block(self, username: str, v: bool) -> None:
+        """Sets the user `username` as blocked if `value` is `True`, or unblocks it otherwise."""
+        self.require_token()
+        self.check(rq.post(self.path(self.endpoints.users.block(username)), json={
             "token": self.token,
             "value": v
         }))

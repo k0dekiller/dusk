@@ -169,3 +169,6 @@ class TestRelationships:
     def test_friend_again(self, client1: Client, username2: str) -> None:
         with error("param.resource.already_exists", "<receiver>"):
             client1.friend(username2, True)
+
+    def test_block_valid(self, client1: Client, username2: str) -> None:
+        client1.block(username2, True)
