@@ -18,7 +18,7 @@ class Client:
         class users:
             """The namespace that contains all the endpoints in the /users directory."""
             @staticmethod
-            def requests(username: str) -> str:
+            def friend(username: str) -> str:
                 """Returns the endpoint for the user `username`'s requests."""
                 return f"users/{username}/friend"
     @overload
