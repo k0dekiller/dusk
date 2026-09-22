@@ -227,7 +227,7 @@ def app(db_path: str = "data.db") -> Flask:
         def block(token: str, receiver: str, value: bool) -> response:
             """Handles user block settings."""
             return Users._relationship(
-                token, receiver, "block", value,
+                token, receiver, "blocked", value,
                 "Receiver is already blocked"
             )
 
