@@ -90,14 +90,19 @@ class Table:
 
             1. `<key> = <value>` becomes `<key> <value>`;
             2. `<key> = <value> -> <foreign>` becomes `<key> <value>` and `FOREIGN KEY (<key>) REFERENCES <foreign>`;
-            3. Prefixing a key with `check_` turns it into the constraint `CONSTRAINT <key> CHECK (<value>)`.
+            3. Setting the key `unique` adds a `UNIQUE (<value>)`;
+            4. Prefixing a key with `check_` turns it into the constraint `CONSTRAINT <key> CHECK (<value>)`.
             """
             cols: list[str] = []
+            unique: str | None = None
             foreign: list[str] = []
             check: list[str] = []
             for k, v in kwargs.items():
                 s = v.split(" -> ")
-                if len(s) > 1:
+                if k == "unique":
+                    unique = f"UNIQUE ({v})"
+                    continue
+                elif len(s) > 1:
                     cols.append(f"{k} {s[0]}")
                     foreign.append(f"FOREIGN KEY ({k}) REFERENCES {s[1]}")
                     continue
@@ -106,7 +111,12 @@ class Table:
                     continue
                 cols.append(f"{k} {v}")
             self.exec(f"CREATE TABLE IF NOT EXISTS {self().name} ({
-                ", ".join(cols + foreign + check)
+                ", ".join(cast(list[str], [])
+                    + cols
+                    + foreign
+                    + ([unique] if unique is not None else [])
+                    + check
+                )
             })", fetch=None)
         def create(self, **kwargs: Any) -> None:
             """Inserts a row with the given `kwargs`."""
