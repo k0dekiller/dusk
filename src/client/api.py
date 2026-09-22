@@ -6,6 +6,8 @@ class RequestError(Exception):
     def __init__(self, code: int, desc: Any) -> None:
         self.code = code
         self.desc = desc
+class LoginRequiredError(Exception):
+    """Raised whenever a `Client`'s request cannot be fulfilled because logging in is required."""
 
 class Client:
     """The class used to communicate with the backend's REST API."""
