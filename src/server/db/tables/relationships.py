@@ -27,7 +27,9 @@ class Relationships(Table):
             receiver="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
             created_at="TEXT NOT NULL",
             friends_since="TEXT",
-            blocked_since="TEXT"
+            blocked_since="TEXT",
+            unique="sender, receiver",
+            check_sender_not_receiver="sender <> receiver"
         )
     @overload#1
     def create(self, sender: int, receiver: int, type: rq_type) -> None: ...
@@ -68,3 +70,13 @@ class Relationships(Table):
     def set(self, *, sender: int, receiver: int, **kwargs: Any) -> None: ...
     def set(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None, **kwargs: Any) -> None:
         self.utils.set(over(id=id, sender=sender, receiver=receiver), kwargs)
+    def set_friend(self, sender: int, receiver: int, friends: bool) -> None:
+        if self.exists(sender=sender, receiver=receiver):
+            self.set(sender=sender, receiver=receiver, friends_since=now() if friends else None)
+        else:
+            self.create(sender=sender, receiver=receiver, type="friends")
+    def set_blocked(self, sender: int, receiver: int, blocked: bool) -> None:
+        if self.exists(sender=sender, receiver=receiver):
+            self.set(sender=sender, receiver=receiver, blocked_since=now() if blocked else None)
+        else:
+            self.create(sender=sender, receiver=receiver, type="blocked")
