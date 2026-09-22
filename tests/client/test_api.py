@@ -65,16 +65,25 @@ def invite(invites: Invites, user: int) -> str:
 
 # CLIENT FIXTURES
 @fixture(scope="session")
-def username() -> str:
+def username1() -> str:
     return "test1"
 @fixture(scope="session")
-def password() -> str:
+def username2() -> str:
+    return "test2"
+@fixture(scope="session")
+def password1() -> str:
     return "Password1!"
+@fixture(scope="session")
+def password2() -> str:
+    return "Password2!"
 def new_client(username: str, password: str) -> Client:
     return Client(f"http://{host}:{port}", username=username, password=password)
 @fixture(scope="session")
-def client(username: str, password: str) -> Client:
-    return new_client(username, password)
+def client1(username1: str, password1: str) -> Client:
+    return new_client(username1, password1)
+@fixture(scope="session")
+def client2(username2: str, password2: str) -> Client:
+    return new_client(username2, password2)
 
 # ERROR CHECKER
 def error(code: str, params: list[str] | str) -> RaisesExc[RequestError]:
@@ -89,27 +98,28 @@ def error(code: str, params: list[str] | str) -> RaisesExc[RequestError]:
 def test_server_running(server: Server) -> None:
     assert server.is_alive() is True
 
-def test_connected(client: Client) -> None:
-    assert client.connected() is True
+def test_connected(client1: Client) -> None:
+    assert client1.connected() is True
 
 def test_connected_invalid() -> None:
     assert Client("http://invalid").connected() is False
 
 class TestSignup:
-    def test_valid(self, client: Client, invite: str) -> None:
-        client.signup(invite)
+    def test_valid(self, client1: Client, client2: Client, invite: str, new_invite: str) -> None:
+        client1.signup(invite)
+        client2.signup(new_invite)
 
-    def test_again(self, client: Client, new_invite: str) -> None:
+    def test_again(self, client1: Client, new_invite: str) -> None:
         with error("param.value.not_unique", "username"):
-            client.signup(new_invite)
+            client1.signup(new_invite)
 
     def test_limit(self, invite: str) -> None:
         with error("param.value.invalid", "invite"):
             new_client("test2", "Password2!").signup(invite)
 
-    def test_invite_invalid(self, client: Client) -> None:
+    def test_invite_invalid(self, client1: Client) -> None:
         with error("param.value.invalid", "invite"):
-            client.signup("invalid")
+            client1.signup("invalid")
 
     def test_username_invalid(self, new_invite: str) -> None:
         with error("param.value.invalid", ["username", "password"]):
@@ -120,8 +130,8 @@ class TestSignup:
             new_client("username", "x").signup(new_invite)
 
 class TestLogin:
-    def test_valid(self, client: Client) -> None:
-        client.login()
+    def test_valid(self, client1: Client) -> None:
+        client1.login()
 
     def test_invalid(self) -> None:
         with error("param.value.invalid", ["username", "password"]):
