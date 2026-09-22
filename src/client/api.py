@@ -19,7 +19,7 @@ class Client:
             """The namespace that contains all the endpoints in the /users directory."""
             @staticmethod
             def friend(username: str) -> str:
-                """Returns the endpoint for the user `username`'s requests."""
+                """Returns the endpoint for setting the user `username`'s friend status."""
                 return f"users/{username}/friend"
     @overload
     def __init__(self, server: str, *, token: str) -> None: ...
