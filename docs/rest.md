@@ -5,4 +5,5 @@
 /login
 /signup
 /<user>/friend
+/<user>/block
 ```
