@@ -87,9 +87,9 @@ def app(db_path: str = "data.db") -> Flask:
         def invalid_token() -> response:
             """Returns an error response specifying that the specified token doesn't exist."""
             return jsonify(rest.error(
-                rest.err.param.value.invalid,
+                rest.err.header.value.invalid,
                 desc=f"Invalid token",
-                params="token"
+                params="Authentication"
             ))
         @staticmethod
         def invalid_invite() -> response:

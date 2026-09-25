@@ -21,6 +21,12 @@ class err:
     class resource:
         """The namespace that contains all resource-related error codes."""
         already_exists: Final = "param.resource.already_exists"
+    class header:
+        """The namespace that contains all header-related error codes."""
+        missing: Final = "header.missing"
+        class value:
+            """The namespace that contains all value-related error codes."""
+            invalid: Final = "header.value.invalid"
 
 def result(success: bool, body: body) -> body:
     """Adds the `success` key to the given `body` and returns it."""
