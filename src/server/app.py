@@ -89,7 +89,7 @@ def app(db_path: str = "data.db") -> Flask:
             return jsonify(rest.error(
                 rest.err.header.value.invalid,
                 desc=f"Invalid token",
-                params="Authentication"
+                params="Authorization"
             ))
         @staticmethod
         def invalid_invite() -> response:
@@ -104,7 +104,7 @@ def app(db_path: str = "data.db") -> Flask:
         return jsonify(rest.success(data)), 200
 
     def token[**P, R](f: Callable[Concatenate[str, P], R]) -> Callable[P, R | response]:
-        """Checks if the `Authentication` header is a valid token."""
+        """Checks if the `Authorization` header is a valid token."""
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | response:
             def validate() -> str | None:

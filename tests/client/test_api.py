@@ -147,7 +147,7 @@ class TestRelationships:
             client2.friend("test1", True)
 
     def test_friend_token_invalid(self, client2: Client) -> None:
-        with error("header.value.invalid", "Authentication"):
+        with error("header.value.invalid", "Authorization"):
             client2.token = "x"
             client2.friend("test1", True)
 
