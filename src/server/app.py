@@ -2,9 +2,9 @@
 
 from collections.abc import Callable
 from sqlite3 import Row
-from typing import Any, cast
+from typing import Any, Concatenate, cast
 from functools import wraps
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 from . import rest
 from .rest import response
@@ -103,14 +103,19 @@ def app(db_path: str = "data.db") -> Flask:
         """Returns a successful response with optional additional data."""
         return jsonify(rest.success(data)), 200
 
-    def token[**P, R](f: Callable[P, R]) -> Callable[P, R | response]:
-        """Checks if the function's `token` argument is valid before running it and returning the result."""
+    def token[**P, R](f: Callable[Concatenate[str, P], R]) -> Callable[P, R | response]:
+        """Checks if the `Authentication` header is a valid token."""
         @wraps(f)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R | response:
-            token = cast(str, kwargs["token"])
-            if not tokens.valid(token=token):
+            def validate() -> str | None:
+                token = request.headers.get("Authorization", None)
+                if token is None: return
+                token = token.removeprefix("Bearer").strip()
+                if not tokens.valid(token=token): return
+                return token
+            if (token := validate()) is None:
                 return err.invalid_token()
-            return f(*args, **kwargs)
+            return f(token, *args, **kwargs)
         return wrapper
 
     def user[**P, R](*usernames: str) -> Callable[[Callable[P, R]], Callable[P, R | response]]:
@@ -209,7 +214,7 @@ def app(db_path: str = "data.db") -> Flask:
             return success()
 
         @app.post(path("<receiver>/friend"))
-        @rest.require("token", "value")
+        @rest.require("value")
         @token
         @user("receiver")
         @staticmethod
@@ -221,7 +226,7 @@ def app(db_path: str = "data.db") -> Flask:
             )
 
         @app.post(path("<receiver>/block"))
-        @rest.require("token", "value")
+        @rest.require("value")
         @token
         @user("receiver")
         @staticmethod

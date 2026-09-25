@@ -1,4 +1,5 @@
-from typing import Any, Never, overload
+from typing import Any, Never, cast, overload
+from collections.abc import Callable
 import requests as rq
 
 class RequestError(Exception):
@@ -40,10 +41,10 @@ class Client:
         self.username = username
         self.password = password
         self.token = token
-    def path(self, s: str | None = None) -> str:
+    def _path(self, s: str | None = None) -> str:
         """Returns the assembled path by merging `self.server` with `s`."""
         return self.server + ("" if self.server.endswith("/") else "/") + (s if s is not None else "")
-    def check[r: rq.Response](self, r: r) -> r:
+    def _check[r: rq.Response](self, r: r) -> r:
         """Checks and returns `r` if it's a valid JSON object, otherwise it raises a `RequestError`."""
         # error definitions
         @overload
@@ -63,10 +64,24 @@ class Client:
         except KeyError, TypeError:
             err(json)
 
+    def _rq(self, action: Callable[..., rq.Response], endpoint: str | None = None, **kwargs: Any) -> rq.Response:
+        return self._check(action(self._path(endpoint), **kwargs, headers=
+            { "Authorization": f"Bearer {self.token}" } if self.token is not None else {}
+        ))
+    def _get(self, endpoint: str | None = None) -> rq.Response:
+        return self._rq(rq.get, endpoint)
+    def _post(self, endpoint: str | None = None, json: dict[str, Any] | None = None) -> rq.Response:
+        return self._rq(rq.post, endpoint, json=json if json is not None else {})
+
+    def _require_token(self) -> None:
+        """Raises `LoginRequiredError` if `self.token` is `None`."""
+        if self.token is None:
+            raise LoginRequiredError
+
     def connected(self) -> bool:
         """Returns `False` if getting `/` in the current server `self.server` raises a `requests.exceptions.ConnectionError`."""
         try:
-            rq.get(self.path())
+            rq.get(self._path())
             return True
         except rq.exceptions.ConnectionError:
             return False
@@ -79,38 +94,31 @@ class Client:
         """Signs up `self` without consuming an invite."""
     def signup(self, invite: str | None = None) -> None:
         """Signs up `self`."""
-        self.check(rq.post(self.path(self.endpoints.signup), json={
+        self._post(self.endpoints.signup, {
             "invite": invite,
             "username": self.username,
             "password": self.password
-        }))
+        })
 
     def login(self) -> str:
         """Logs in `self` and returns the resulting `self.token`."""
-        r = self.check(rq.post(self.path(self.endpoints.login), json={
+        r = self._post(self.endpoints.login, {
             "username": self.username,
             "password": self.password
-        }))
-        self.token = r.json()["data"]["token"]
+        })
+        self.token = cast(str, r.json()["data"]["token"])
         return self.token
-
-    def require_token(self) -> None:
-        """Raises `LoginRequiredError` if `self.token` is `None`."""
-        if self.token is None:
-            raise LoginRequiredError
 
     def friend(self, username: str, v: bool) -> None:
         """Sets the user `username` as a friend if `value` is `True`, or removes it otherwise."""
-        self.require_token()
-        self.check(rq.post(self.path(self.endpoints.users.friend(username)), json={
-            "token": self.token,
+        self._require_token()
+        self._post(self.endpoints.users.friend(username), {
             "value": v
-        }))
+        })
 
     def block(self, username: str, v: bool) -> None:
         """Sets the user `username` as blocked if `value` is `True`, or unblocks it otherwise."""
-        self.require_token()
-        self.check(rq.post(self.path(self.endpoints.users.block(username)), json={
-            "token": self.token,
+        self._require_token()
+        self._post(self.endpoints.users.block(username), {
             "value": v
-        }))
+        })
