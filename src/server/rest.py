@@ -36,12 +36,15 @@ def result(success: bool, body: body) -> body:
 def success(data: body) -> body:
     """Adds the `"success": True` key to the given `body` and returns it."""
 @overload
+def success(data: list[Any]) -> body:
+    """Adds the `"success": True` key to the given `list` and returns it."""
+@overload
 def success() -> body:
     """Adds the `"success": True` key to a new body and returns it."""
 @overload
 def success(data: None) -> body:
     """Adds the `"success": True` key to a new body and returns it."""
-def success(data: body | None = None) -> body:
+def success(data: body | list[Any] | None = None) -> body:
     """Adds the `"success": True` key to the given `body` (or creates a new one if not given) and returns it."""
     return result(True, {"data": data} if data is not None else {})
 def error(code: str, *, desc: str | None = None, params: list[str] | str | None = None) -> body:
