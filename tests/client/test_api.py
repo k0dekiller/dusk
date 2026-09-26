@@ -52,7 +52,7 @@ def invites(conn: Connector) -> Invites:
 @fixture(scope="session")
 def user(users: Users) -> int:
     username = "system"
-    users.create(username, "password")
+    users.create(username, "Password0!")
     info = users.get(username=username)
     assert info is not None
     return info["id"]
