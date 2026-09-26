@@ -9,3 +9,5 @@ key.bin
 *.db
 
 TODO.md
+
+main.py
