@@ -207,7 +207,7 @@ def app(db_path: str = "data.db") -> Flask:
 
         @staticmethod
         def _root(user: str) -> set[str]:
-            return set(r[0] for r in relationships.get(sender=user, mutual="friend"))
+            return relationships.get(sender=user, mutual="friend")
         
         @staticmethod
         def _incoming(user: str) -> set[str]:

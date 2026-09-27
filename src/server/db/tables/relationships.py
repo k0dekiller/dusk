@@ -53,16 +53,16 @@ class Relationships(Table):
     @overload#6
     def get(self, *, receiver: str, type: rq_type) -> list[Row]: ...
     @overload#7
-    def get(self, *, sender: str, mutual: rq_type) -> list[Row]: ...
+    def get(self, *, sender: str, mutual: rq_type) -> set[str]: ...
     @overload#8
-    def get(self, *, receiver: str, mutual: rq_type) -> list[Row]: ...
+    def get(self, *, receiver: str, mutual: rq_type) -> set[str]: ...
     def get(self, *,
             id: int | None = None,
             sender: str | None = None,
             receiver: str | None = None,
             type: rq_type | None = None,
             mutual: rq_type | None = None
-        ) -> list[Row] | Row | None:
+        ) -> list[Row] | set[str] | Row | None:
         def q(sender: str | None, receiver: str | None) -> tuple[str, str]:
             return f"""
                 SELECT r1.receiver AS username
@@ -79,7 +79,7 @@ class Relationships(Table):
         if sender is not None and receiver is not None:
             return self.utils.get(over(sender=sender, receiver=receiver))
         if mutual is not None:
-            return self.utils.exec(*q(sender, receiver), fetch="all")
+            return set(r["username"] for r in self.utils.exec(*q(sender, receiver), fetch="all"))
         return self.utils.get(over(sender=sender, receiver=receiver),
             q=f"AND {type}_since IS NOT NULL" if type is not None else None
         , fetch="all")
