@@ -33,6 +33,10 @@ class Client:
             def block(username: str) -> str:
                 """Returns the endpoint for setting the user `username`'s blocked status."""
                 return f"users/{username}/block"
+            @staticmethod
+            def info(usernames: list[str] | str | None) -> str:
+                """Returns the endpoint for getting the users `usernames`'s info."""
+                return f"users/{",".join(list(usernames)) if usernames else "@"}/info"
     @overload
     def __init__(self, server: str, *, token: str) -> None: ...
     @overload
