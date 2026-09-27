@@ -12,6 +12,8 @@ from src.server.app import app as flask
 from src.client.api import Client, RequestError, LoginRequiredError
 
 import os
+import logging
+import re
 
 file = "test_api.db"
 host, port = "localhost", 8181
@@ -20,17 +22,33 @@ if os.path.exists(file): os.remove(file)
 
 # SERVER THREAD
 class Server(Thread):
+    class Formatter(logging.Formatter):
+        escape = re.compile(r"\x1b\[[0-9;]*m")
+        def format(self, record: logging.LogRecord) -> str:
+            msg = super().format(record)
+            return self.escape.sub("", msg)
     def __init__(self) -> None:
+        # init server
         super().__init__(daemon=True)
         app = flask(file)
         app.config.update(TESTING=True) # type: ignore
         self.server = make_server(host, port, app)
         self.ctx = app.app_context()
         self.ctx.push()
+
+        # log to file
+        self.handler = logging.FileHandler("test.log", mode="w")
+        self.handler.setFormatter(self.Formatter("%(asctime)s %(message)s"))
+        self.logger = logging.getLogger("werkzeug")
+        self.logger.addHandler(self.handler)
+        self.logger.setLevel(logging.INFO)
+
     def run(self) -> None:
         self.server.serve_forever()
+
     def shutdown(self) -> None:
         self.server.shutdown()
+        self.logger.removeHandler(self.handler)
 
 # SERVER FIXTURES
 @fixture(scope="session")
