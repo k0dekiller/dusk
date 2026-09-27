@@ -58,7 +58,7 @@ def app(db_path: str = "data.db") -> Flask:
                 rest.err.param.value.invalid,
                 desc=f"Wrong username",
                 params="username"
-            ))
+            )), 400
         @staticmethod
         def wrong_login() -> response:
             """Returns an error response specifying that the specified username and password don't match an existing user."""
@@ -74,7 +74,7 @@ def app(db_path: str = "data.db") -> Flask:
                 rest.err.param.value.invalid,
                 desc=f"Invalid username",
                 params="username"
-            ))
+            )), 400
         @staticmethod
         def invalid_login() -> response:
             """Returns an error response specifying that the specified username and password are not valid."""
@@ -90,7 +90,7 @@ def app(db_path: str = "data.db") -> Flask:
                 rest.err.header.value.invalid,
                 desc=f"Invalid token",
                 params="Authorization"
-            ))
+            )), 400
         @staticmethod
         def invalid_invite() -> response:
             """Returns an error response specifying that the specified invite doesn't exist."""
@@ -99,7 +99,7 @@ def app(db_path: str = "data.db") -> Flask:
                 desc=f"Invalid invite code",
                 params="invite"
             )), 400
-    def success(data: rest.body | list[Any] | None = None) -> response:
+    def success(data: rest.body | list[Any] | set[Any] | None = None) -> response:
         """Returns a successful response with optional additional data."""
         return jsonify(rest.success(data)), 200
 
