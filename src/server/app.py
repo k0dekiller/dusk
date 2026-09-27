@@ -214,37 +214,37 @@ def app(db_path: str = "data.db") -> Flask:
         path = Root.sub("friends")
 
         @staticmethod
-        def _root(user: str) -> set[str]:
+        def get_mutual(user: str) -> set[str]:
             return relationships.get(sender=user, mutual="friend")
         
         @staticmethod
-        def _incoming(user: str) -> set[str]:
-            return set(r["sender"] for r in relationships.get(receiver=user)) - Friends._root(user)
+        def get_incoming(user: str) -> set[str]:
+            return set(r["sender"] for r in relationships.get(receiver=user)) - Friends.get_mutual(user)
         
         @staticmethod
-        def _outgoing(user: str) -> set[str]:
-            return set(r["receiver"] for r in relationships.get(sender=user)) - Friends._root(user)
+        def get_outgoing(user: str) -> set[str]:
+            return set(r["receiver"] for r in relationships.get(sender=user)) - Friends.get_mutual(user)
 
         @app.get(path(""))
         @token
         @staticmethod
         def root(token: str) -> response:
             """Returns the user's mutual friendships."""
-            return success(Friends._root(owner(token)))
+            return success(Friends.get_mutual(owner(token)))
 
         @app.get(path("incoming"))
         @token
         @staticmethod
         def incoming(token: str) -> response:
             """Returns the user's incoming friend requests."""
-            return success(Friends._incoming(owner(token)))
+            return success(Friends.get_incoming(owner(token)))
 
         @app.get(path("outgoing"))
         @token
         @staticmethod
         def outgoing(token: str) -> response:
             """Returns the user's outgoing friend requests."""
-            return success(Friends._outgoing(owner(token)))
+            return success(Friends.get_outgoing(owner(token)))
 
     class Users(Root):
         """Defines the endpoint handlers for `/users`."""
