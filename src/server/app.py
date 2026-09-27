@@ -15,7 +15,7 @@ from . import validator as v
 def mkpath(path: str = "") -> Callable[[str], str]:
     """Returns a function that appends a subpath to `path`."""
     def p(subpath: str = "") -> str:
-        return f"{path}/{subpath}"
+        return f"{path}{f"/{subpath}" if subpath else ""}"
     return p
 
 def row(row: Any) -> Row:
