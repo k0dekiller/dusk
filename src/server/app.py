@@ -139,7 +139,7 @@ def app(db_path: str = "data.db") -> Flask:
         """Defines the endpoint handlers for `/`."""
         path = mkpath()
         @classmethod
-        def sub(cls, path: str = "") -> Callable[[str], str]:
+        def sub(cls, path: str) -> Callable[[str], str]:
             """Returns a function that appends a subpath to this class' path plus a the subpath `path`."""
             return mkpath(cls.path(path))
 
