@@ -135,6 +135,10 @@ def app(db_path: str = "data.db") -> Flask:
             return wrapper
         return w
 
+    def owner(token: str) -> int:
+        """Returns the `token`'s owner."""
+        return row(tokens.get(token=token))["owner"]
+
     class Root:
         """Defines the endpoint handlers for `/`."""
         path = mkpath()
