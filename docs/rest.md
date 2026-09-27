@@ -6,4 +6,8 @@
 /signup
 /users/<user>/friend
 /users/<user>/block
+/friends
+/friends/incoming
+/friends/outgoing
+/blocked
 ```

@@ -39,13 +39,17 @@ def success(data: body) -> body:
 def success(data: list[Any]) -> body:
     """Adds the `"success": True` key to the given `list` and returns it."""
 @overload
+def success(data: set[Any]) -> body:
+    """Adds the `"success": True` key to the given `set` and returns it."""
+@overload
 def success() -> body:
     """Adds the `"success": True` key to a new body and returns it."""
 @overload
 def success(data: None) -> body:
     """Adds the `"success": True` key to a new body and returns it."""
-def success(data: body | list[Any] | None = None) -> body:
+def success(data: body | list[Any] | set[Any] | None = None) -> body:
     """Adds the `"success": True` key to the given `body` (or creates a new one if not given) and returns it."""
+    if isinstance(data, set): data = list(data)
     return result(True, {"data": data} if data is not None else {})
 def error(code: str, *, desc: str | None = None, params: list[str] | str | None = None) -> body:
     """Returns a new body with the `code`, `desc` and `params` keys."""

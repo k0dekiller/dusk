@@ -1,4 +1,4 @@
-from typing import Any, Never, cast, overload
+from typing import Any, Literal, Never, cast, overload
 from collections.abc import Callable
 import requests as rq
 
@@ -16,8 +16,15 @@ class Client:
         """The namespace that contains all the endpoints."""
         login = "login"
         signup = "signup"
+        blocked = "blocked"
+        class friends:
+            """The namespace that contains all the endpoints in the `/friends` directory."""
+            root = "friends"
+            incoming = "friends/incoming"
+            outgoing = "friends/outgoing"
         class users:
-            """The namespace that contains all the endpoints in the /users directory."""
+            """The namespace that contains all the endpoints in the `/users` directory."""
+            root = "users"
             @staticmethod
             def friend(username: str) -> str:
                 """Returns the endpoint for setting the user `username`'s friend status."""
@@ -108,6 +115,28 @@ class Client:
         })
         self.token = cast(str, r.json()["data"]["token"])
         return self.token
+
+    @overload
+    def friends(self) -> list[int]:
+        """Returns the list of mutual friends."""
+    @overload
+    def friends(self, *, incoming: Literal[True]) -> list[int]:
+        """Returns the list of incoming friend requests."""
+    @overload
+    def friends(self, *, outgoing: Literal[True]) -> list[int]:
+        """Returns the list of outgoing friend requests."""
+    def friends(self, *, incoming: bool = False, outgoing: bool = False) -> list[int]:
+        """Returns the list of mutual friends or incoming or outgoing friend requests."""
+        self._require_token()
+        if incoming:    r = self._get(self.endpoints.friends.incoming)
+        elif outgoing:  r = self._get(self.endpoints.friends.outgoing)
+        else:           r = self._get(self.endpoints.friends.root)
+        return r.json()["data"]
+
+    def blocked(self) -> list[int]:
+        """Returns the list of blocked users."""
+        r = self._get(self.endpoints.blocked)
+        return r.json()["data"]
 
     def friend(self, username: str, v: bool) -> None:
         """Sets the user `username` as a friend if `value` is `True`, or removes it otherwise."""

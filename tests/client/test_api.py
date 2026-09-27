@@ -163,12 +163,55 @@ class TestRelationships:
         with error("param.value.invalid", "username"):
             client1.friend(username1, True)
 
-    def test_friend_valid(self, client1: Client, username2: str) -> None:
+    def test_friends_incoming_none(self, client1: Client, client2: Client) -> None:
+        client2.login()
+        assert client1.friends(incoming=True) == []
+        assert client2.friends(incoming=True) == []
+
+    def test_friends_outgoing_none(self, client1: Client, client2: Client) -> None:
+        client2.login()
+        assert client1.friends(outgoing=True) == []
+        assert client2.friends(outgoing=True) == []
+
+    def test_friend_valid(self, client2: Client, username1: str) -> None:
+        client2.friend(username1, True)
+
+    def test_friends_incoming_valid(self, client1: Client, client2: Client) -> None:
+        assert client1.friends(incoming=True) == [3]
+        assert client2.friends(incoming=True) == []
+
+    def test_friends_outgoing_valid(self, client1: Client, client2: Client) -> None:
+        assert client1.friends(outgoing=True) == []
+        assert client2.friends(outgoing=True) == [2]
+
+    def test_friend_again(self, client2: Client, username1: str) -> None:
+        with error("param.resource.already_exists", "<receiver>"):
+            client2.friend(username1, True)
+
+    def test_block_valid(self, client2: Client, username1: str) -> None:
+        client2.block(username1, True)
+
+    def test_friends_none(self, client1: Client, client2: Client) -> None:
+        assert client1.friends() == []
+        assert client2.friends() == []
+
+    def test_friend_mutual(self, client1: Client, username2: str) -> None:
         client1.friend(username2, True)
 
-    def test_friend_again(self, client1: Client, username2: str) -> None:
-        with error("param.resource.already_exists", "<receiver>"):
-            client1.friend(username2, True)
+    def test_friends_valid(self, client1: Client, client2: Client) -> None:
+        assert client1.friends() == [3]
+        assert client2.friends() == [2]
 
-    def test_block_valid(self, client1: Client, username2: str) -> None:
-        client1.block(username2, True)
+    def test_friends_incoming_mutual(self, client1: Client, client2: Client) -> None:
+        assert client1.friends(incoming=True) == []
+        assert client2.friends(incoming=True) == []
+
+    def test_friends_outgoing_mutual(self, client1: Client, client2: Client) -> None:
+        assert client1.friends(outgoing=True) == []
+        assert client2.friends(outgoing=True) == []
+
+    def test_blocked_none(self, client1: Client) -> None:
+        assert client1.blocked() == []
+
+    def test_blocked_valid(self, client2: Client) -> None:
+        assert client2.blocked() == [2]

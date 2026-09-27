@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from sqlite3 import Row
-from typing import Any, Concatenate, cast
+from typing import Any, Concatenate, Literal, cast
 from functools import wraps
 from flask import Flask, jsonify, request
 
@@ -193,12 +193,59 @@ def app(db_path: str = "data.db") -> Flask:
 
             return success()
 
+        @app.get(path("blocked"))
+        @token
+        @staticmethod
+        def blocked(token: str) -> response:
+            """Returns the users that the user blocked."""
+            user = owner(token)
+            return success([
+                r["receiver"] for r in relationships.get(sender=user, type="blocked")
+            ])
+
+    class Friends(Root):
+        """Defines the endpoint handlers for `/friends`."""
+        path = Root.sub("friends")
+
+        @staticmethod
+        def _root(user: int) -> set[int]:
+            return set(r[0] for r in relationships.get(sender=user, mutual="friend"))
+        
+        @staticmethod
+        def _incoming(user: int) -> set[int]:
+            return set(r["sender"] for r in relationships.get(receiver=user)) - Friends._root(user)
+        
+        @staticmethod
+        def _outgoing(user: int) -> set[int]:
+            return set(r["receiver"] for r in relationships.get(sender=user)) - Friends._root(user)
+
+        @app.get(path(""))
+        @token
+        @staticmethod
+        def root(token: str) -> response:
+            """Returns the user's mutual friendships."""
+            return success(Friends._root(owner(token)))
+
+        @app.get(path("incoming"))
+        @token
+        @staticmethod
+        def incoming(token: str) -> response:
+            """Returns the user's incoming friend requests."""
+            return success(Friends._incoming(owner(token)))
+
+        @app.get(path("outgoing"))
+        @token
+        @staticmethod
+        def outgoing(token: str) -> response:
+            """Returns the user's outgoing friend requests."""
+            return success(Friends._outgoing(owner(token)))
+
     class Users(Root):
         """Defines the endpoint handlers for `/users`."""
         path = Root.sub("users")
 
         @staticmethod
-        def _relationship(token: str, receiver: str, action: str, value: bool, conflict_desc: str | None) -> response:
+        def _relationship(token: str, receiver: str, action: Literal["friend", "blocked"], value: bool, conflict_desc: str | None) -> response:
             s: int = row(tokens.get(token=token))["owner"]
             r: int = row(users.get(username=receiver))["id"]
             if s == r:
@@ -214,7 +261,9 @@ def app(db_path: str = "data.db") -> Flask:
                     desc=conflict_desc,
                     params="<receiver>"
                 )), 400
-            relationships.set_friend(s, r, value)
+            match action:
+                case "friend":  relationships.set_friend(s, r, value)
+                case "blocked": relationships.set_blocked(s, r, value)
             return success()
 
         @app.post(path("<receiver>/friend"))

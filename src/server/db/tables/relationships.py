@@ -48,16 +48,41 @@ class Relationships(Table):
     def get(self, *, sender: int) -> list[Row]: ...
     @overload#4
     def get(self, *, receiver: int) -> list[Row]: ...
+    @overload#5
+    def get(self, *, sender: int, type: rq_type) -> list[Row]: ...
+    @overload#6
+    def get(self, *, receiver: int, type: rq_type) -> list[Row]: ...
+    @overload#7
+    def get(self, *, sender: int, mutual: rq_type) -> list[Row]: ...
+    @overload#8
+    def get(self, *, receiver: int, mutual: rq_type) -> list[Row]: ...
     def get(self, *,
             id: int | None = None,
             sender: int | None = None,
-            receiver: int | None = None
+            receiver: int | None = None,
+            type: rq_type | None = None,
+            mutual: rq_type | None = None
         ) -> list[Row] | Row | None:
+        def q(sender: int | None, receiver: int | None) -> tuple[str, int]:
+            return f"""
+                SELECT r1.receiver AS id
+                FROM relationships r1
+                JOIN relationships r2
+                    ON r2.sender = r1.receiver
+                    AND r2.receiver = r1.sender
+                WHERE r1.{"sender" if sender is not None else "receiver"} = ?
+                    AND r1.{mutual}_since IS NOT NULL
+                    AND r2.{mutual}_since IS NOT NULL;
+            """, cast(int, sender if sender is not None else receiver)
         if id is not None:
             return self.utils.get(over(id=id))
         if sender is not None and receiver is not None:
             return self.utils.get(over(sender=sender, receiver=receiver))
-        return self.utils.get(over(sender=sender, receiver=receiver), fetch="all")
+        if mutual is not None:
+            return self.utils.exec(*q(sender, receiver), fetch="all")
+        return self.utils.get(over(sender=sender, receiver=receiver),
+            q=f"AND {type}_since IS NOT NULL" if type is not None else None
+        , fetch="all")
     @overload#1
     def exists(self, *, id: int) -> bool: ...
     @overload#2
@@ -75,8 +100,8 @@ class Relationships(Table):
             self.set(sender=sender, receiver=receiver, friend_since=now() if v else None)
         else:
             self.create(sender=sender, receiver=receiver, type="friend")
-    def set_blocked(self, sender: int, receiver: int, blocked: bool) -> None:
+    def set_blocked(self, sender: int, receiver: int, v: bool) -> None:
         if self.exists(sender=sender, receiver=receiver):
-            self.set(sender=sender, receiver=receiver, blocked_since=now() if blocked else None)
+            self.set(sender=sender, receiver=receiver, blocked_since=now() if v else None)
         else:
             self.create(sender=sender, receiver=receiver, type="blocked")
