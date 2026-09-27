@@ -27,6 +27,9 @@ class err:
         class value:
             """The namespace that contains all value-related error codes."""
             invalid: Final = "header.value.invalid"
+    class access:
+        """The namespace that contains all access-related error codes."""
+        forbidden: Final = "access.forbidden"
 
 def result(success: bool, body: body) -> body:
     """Adds the `success` key to the given `body` and returns it."""

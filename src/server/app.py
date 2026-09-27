@@ -99,6 +99,10 @@ def app(db_path: str = "data.db") -> Flask:
                 desc=f"Invalid invite code",
                 params="invite"
             )), 400
+        @staticmethod
+        def forbidden() -> response:
+            """Returns an error response specifying that access to the requested resource is forbidden."""
+            return jsonify(rest.error(rest.err.access.forbidden)), 403
     def success(data: rest.body | list[Any] | set[Any] | None = None) -> response:
         """Returns a successful response with optional additional data."""
         return jsonify(rest.success(data)), 200
