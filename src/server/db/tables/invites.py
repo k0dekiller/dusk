@@ -27,13 +27,13 @@ class Invites(Table):
         self.utils.init(
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
             code="TEXT NOT NULL UNIQUE",
-            owner="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
+            owner="TEXT NOT NULL -> users(username) ON DELETE CASCADE",
             max_uses="INTEGER",
             created_at="TEXT NOT NULL",
             use_count="INTEGER NOT NULL DEFAULT 0",
             archived_at="TEXT"
         )
-    def create(self, owner: int, max_uses: int | None = 1) -> str:
+    def create(self, owner: str, max_uses: int | None = 1) -> str:
         code = secrets.token_urlsafe(10)
         self.utils.create(code=code, owner=owner, max_uses=max_uses, created_at=now())
         return code

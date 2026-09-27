@@ -49,30 +49,29 @@ class TestUsers:
             users.create("test3", "password3", (1, None))
 
     def test_get_valid(self, users: Users) -> None:
-        info = users.get(username="test1")
+        info = users.get("test1")
         assert info is not None
-        assert info["id"] == 1
 
     def test_get_invalid(self, users: Users) -> None:
-        assert users.get(username="invalid") is None
+        assert users.get("invalid") is None
 
     def test_exists_valid(self, users: Users) -> None:
-        assert users.exists(username="test1") is True
+        assert users.exists("test1") is True
 
     def test_exists_invalid(self, users: Users) -> None:
-        assert users.exists(username="invalid") is False
+        assert users.exists("invalid") is False
 
     def test_valid_valid(self, users: Users) -> None:
-        assert users.valid(username="test1") is True
+        assert users.valid("test1") is True
 
     def test_valid_invalid(self, users: Users) -> None:
-        assert users.valid(username="invalid") is False
+        assert users.valid("invalid") is False
 
     def test_archived_valid(self, users: Users) -> None:
-        assert users.archived(username="test1") is False
+        assert users.archived("test1") is False
 
     def test_archived_invalid(self, users: Users) -> None:
-        assert users.archived(username="invalid") is False
+        assert users.archived("invalid") is False
 
     def test_login_incorrect(self, users: Users) -> None:
         assert users.login("test1", "wrong1") is False
@@ -81,42 +80,42 @@ class TestUsers:
         assert users.login("test1", "password1") is True
 
     def test_archive_valid(self, users: Users) -> None:
-        users.delete(username="test1")
+        users.delete("test1")
 
     def test_archive_invalid(self, users: Users) -> None:
         with raises(users.UserNotFoundError):
-            users.delete(username="invalid")
+            users.delete("invalid")
 
     def test_login_archived(self, users: Users) -> None:
         assert users.login("test1", "password1") is False
 
     def test_exists_archived(self, users: Users) -> None:
-        assert users.exists(username="test1") is True
+        assert users.exists("test1") is True
 
     def test_valid_archived(self, users: Users) -> None:
-        assert users.valid(username="test1") is False
+        assert users.valid("test1") is False
 
     def test_archived_archived(self, users: Users) -> None:
-        assert users.archived(username="test1") is True
+        assert users.archived("test1") is True
 
     def test_delete_valid(self, users: Users) -> None:
-        users.delete(username="test1", hard=True)
+        users.delete("test1", hard=True)
 
     def test_delete_invalid(self, users: Users) -> None:
         with raises(users.UserNotFoundError):
-            users.delete(username="invalid", hard=True)
+            users.delete("invalid", hard=True)
 
     def test_login_correct_deleted(self, users: Users) -> None:
         assert users.login("test1", "password1") is False
 
     def test_exists_deleted(self, users: Users) -> None:
-        assert users.exists(username="test1") is False
+        assert users.exists("test1") is False
 
     def test_valid_deleted(self, users: Users) -> None:
-        assert users.valid(username="test1") is False
+        assert users.valid("test1") is False
 
     def test_archived_deleted(self, users: Users) -> None:
-        assert users.archived(username="test1") is False
+        assert users.archived("test1") is False
 
 @fixture(scope="session")
 def invites(conn: Connector) -> Invites:
@@ -124,11 +123,11 @@ def invites(conn: Connector) -> Invites:
 class TestInvites:
     @fixture(scope="session")
     def invite(self, invites: Invites) -> str:
-        return invites.create(2)
+        return invites.create("test2")
 
     def test_create_owner_invalid(self, invites: Invites) -> None:
         with raises(invites.OwnerNotFoundError):
-            invites.create(0)
+            invites.create("x")
 
     def test_get_valid(self, invites: Invites, invite: str) -> None:
         info = invites.get(code=invite)
@@ -194,11 +193,11 @@ def tokens(conn: Connector) -> Tokens:
 class TestTokens:
     @fixture(scope="session")
     def token(self, tokens: Tokens) -> str:
-        return tokens.create(2)
+        return tokens.create("test2")
 
     def test_create_owner_invalid(self, tokens: Tokens) -> None:
         with raises(tokens.OwnerNotFoundError):
-            tokens.create(0)
+            tokens.create("x")
 
     def test_get_valid(self, tokens: Tokens, token: str) -> None:
         info = tokens.get(token=token)
@@ -264,31 +263,31 @@ def relationships(conn: Connector) -> Relationships:
 class TestRelationships:
     def test_create_sender_invalid(self, relationships: Relationships) -> None:
         with raises(relationships.RelationshipConstraintError):
-            relationships.create(0, 3)
+            relationships.create("x", "test3")
 
     def test_create_receiver_invalid(self, relationships: Relationships) -> None:
         with raises(relationships.RelationshipConstraintError):
-            relationships.create(2, 0)
+            relationships.create("test2", "x")
 
     def test_create_same_invalid(self, relationships: Relationships) -> None:
         with raises(relationships.RelationshipConstraintError):
-            relationships.create(2, 2)
+            relationships.create("test2", "test2")
 
     def test_create_invalid(self, relationships: Relationships) -> None:
         with raises(relationships.RelationshipConstraintError):
-            relationships.create(0, 0)
+            relationships.create("x", "x")
 
     def test_set_friend_valid(self, relationships: Relationships) -> None:
-        relationships.set_friend(2, 3, True)
+        relationships.set_friend("test2", "test3", True)
 
     def test_set_friend_again(self, relationships: Relationships) -> None:
-        relationships.set_friend(2, 3, False)
+        relationships.set_friend("test2", "test3", False)
 
     def test_set_blocked_valid(self, relationships: Relationships) -> None:
-        relationships.set_blocked(2, 3, True)
+        relationships.set_blocked("test2", "test3", True)
 
     def test_set_blocked_again(self, relationships: Relationships) -> None:
-        relationships.set_blocked(2, 3, False)
+        relationships.set_blocked("test2", "test3", False)
 
     def test_get_valid(self, relationships: Relationships) -> None:
         info = relationships.get(id=1)
@@ -296,22 +295,22 @@ class TestRelationships:
         assert info["id"] == 1
 
     def test_get_sender_valid(self, relationships: Relationships) -> None:
-        infos = relationships.get(sender=2)
+        infos = relationships.get(sender="test2")
         assert len(infos) == 1
         info = infos[0]
-        assert info["sender"] == 2
+        assert info["sender"] == "test2"
 
     def test_get_receiver_valid(self, relationships: Relationships) -> None:
-        infos = relationships.get(receiver=3)
+        infos = relationships.get(receiver="test3")
         assert len(infos) == 1
         info = infos[0]
-        assert info["receiver"] == 3
+        assert info["receiver"] == "test3"
 
     def test_get_sender_receiver_valid(self, relationships: Relationships) -> None:
-        info = relationships.get(sender=2, receiver=3)
+        info = relationships.get(sender="test2", receiver="test3")
         assert info is not None
-        assert info["sender"] == 2
-        assert info["receiver"] == 3
+        assert info["sender"] == "test2"
+        assert info["receiver"] == "test3"
 
     def test_exists_valid(self, relationships: Relationships) -> None:
         assert relationships.exists(id=1) is True

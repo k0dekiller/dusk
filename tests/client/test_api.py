@@ -50,17 +50,15 @@ def users(conn: Connector) -> Users:
 def invites(conn: Connector) -> Invites:
     return Invites(conn)
 @fixture(scope="session")
-def user(users: Users) -> int:
+def user(users: Users) -> str:
     username = "system"
     users.create(username, "Password0!")
-    info = users.get(username=username)
-    assert info is not None
-    return info["id"]
+    return username
 @fixture
-def new_invite(invites: Invites, user: int) -> str:
+def new_invite(invites: Invites, user: str) -> str:
     return invites.create(user)
 @fixture(scope="session")
-def invite(invites: Invites, user: int) -> str:
+def invite(invites: Invites, user: str) -> str:
     return invites.create(user)
 
 # CLIENT FIXTURES
@@ -176,13 +174,13 @@ class TestRelationships:
     def test_friend_valid(self, client2: Client, username1: str) -> None:
         client2.friend(username1, True)
 
-    def test_friends_incoming_valid(self, client1: Client, client2: Client) -> None:
-        assert client1.friends(incoming=True) == [3]
+    def test_friends_incoming_valid(self, client1: Client, client2: Client, username2: str) -> None:
+        assert client1.friends(incoming=True) == [username2]
         assert client2.friends(incoming=True) == []
 
-    def test_friends_outgoing_valid(self, client1: Client, client2: Client) -> None:
+    def test_friends_outgoing_valid(self, client1: Client, client2: Client, username1: str) -> None:
         assert client1.friends(outgoing=True) == []
-        assert client2.friends(outgoing=True) == [2]
+        assert client2.friends(outgoing=True) == [username1]
 
     def test_friend_again(self, client2: Client, username1: str) -> None:
         with error("param.resource.already_exists", "<receiver>"):
@@ -198,9 +196,9 @@ class TestRelationships:
     def test_friend_mutual(self, client1: Client, username2: str) -> None:
         client1.friend(username2, True)
 
-    def test_friends_valid(self, client1: Client, client2: Client) -> None:
-        assert client1.friends() == [3]
-        assert client2.friends() == [2]
+    def test_friends_valid(self, client1: Client, client2: Client, username1: str, username2: str) -> None:
+        assert client1.friends() == [username2]
+        assert client2.friends() == [username1]
 
     def test_friends_incoming_mutual(self, client1: Client, client2: Client) -> None:
         assert client1.friends(incoming=True) == []
@@ -213,5 +211,5 @@ class TestRelationships:
     def test_blocked_none(self, client1: Client) -> None:
         assert client1.blocked() == []
 
-    def test_blocked_valid(self, client2: Client) -> None:
-        assert client2.blocked() == [2]
+    def test_blocked_valid(self, client2: Client, username1: str) -> None:
+        assert client2.blocked() == [username1]

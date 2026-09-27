@@ -37,14 +37,13 @@ Returns `True` if a `Row` object is archived.
 - [x] `invites`
     - [x] `id`
     - [x] `code`
-    - [x] `owner` **→** `users.id`
+    - [x] `owner` **→** `users.username`
     - [x] `max_uses`
     - [x] `created_at`
     - [x] `use_count`
     - [x] `archived_at?`
     - [ ] `expires_at?`
 - [x] `users`
-    - [x] `id`
     - [x] `username`
     - [x] `password_hash`
     - [x] `archived_at?`
@@ -53,7 +52,7 @@ Returns `True` if a `Row` object is archived.
     - [x] `used_invite_n` **`?`** `used_invite`
 - [x] `tokens`
     - [x] `id`
-    - [x] `owner` **→** `users.id`
+    - [x] `owner` **→** `users.username`
     - [x] `archived_at?`
     - [x] `token_hash`
     - [x] `created_at`

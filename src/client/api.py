@@ -117,15 +117,15 @@ class Client:
         return self.token
 
     @overload
-    def friends(self) -> list[int]:
+    def friends(self) -> list[str]:
         """Returns the list of mutual friends."""
     @overload
-    def friends(self, *, incoming: Literal[True]) -> list[int]:
+    def friends(self, *, incoming: Literal[True]) -> list[str]:
         """Returns the list of incoming friend requests."""
     @overload
-    def friends(self, *, outgoing: Literal[True]) -> list[int]:
+    def friends(self, *, outgoing: Literal[True]) -> list[str]:
         """Returns the list of outgoing friend requests."""
-    def friends(self, *, incoming: bool = False, outgoing: bool = False) -> list[int]:
+    def friends(self, *, incoming: bool = False, outgoing: bool = False) -> list[str]:
         """Returns the list of mutual friends or incoming or outgoing friend requests."""
         self._require_token()
         if incoming:    r = self._get(self.endpoints.friends.incoming)
@@ -133,7 +133,7 @@ class Client:
         else:           r = self._get(self.endpoints.friends.root)
         return r.json()["data"]
 
-    def blocked(self) -> list[int]:
+    def blocked(self) -> list[str]:
         """Returns the list of blocked users."""
         r = self._get(self.endpoints.blocked)
         return r.json()["data"]

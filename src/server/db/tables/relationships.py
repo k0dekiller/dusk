@@ -23,8 +23,8 @@ class Relationships(Table):
     def init(self) -> None:
         self.utils.init(
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
-            sender="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
-            receiver="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
+            sender="TEXT NOT NULL -> users(username) ON DELETE CASCADE",
+            receiver="TEXT NOT NULL -> users(username) ON DELETE CASCADE",
             created_at="TEXT NOT NULL",
             friend_since="TEXT",
             blocked_since="TEXT",
@@ -32,10 +32,10 @@ class Relationships(Table):
             check_sender_not_receiver="sender <> receiver"
         )
     @overload#1
-    def create(self, sender: int, receiver: int, type: rq_type) -> None: ...
+    def create(self, sender: str, receiver: str, type: rq_type) -> None: ...
     @overload#2
-    def create(self, sender: int, receiver: int) -> None: ...
-    def create(self, sender: int, receiver: int, type: rq_type | None = None) -> None:
+    def create(self, sender: str, receiver: str) -> None: ...
+    def create(self, sender: str, receiver: str, type: rq_type | None = None) -> None:
         self.utils.create(sender=sender, receiver=receiver, created_at=now(), **(over(
             friend_since=now()  if type == "friend"  else None,
             blocked_since=now() if type == "blocked" else None,
@@ -43,29 +43,29 @@ class Relationships(Table):
     @overload#1
     def get(self, *, id: int) -> Row | None: ...
     @overload#2
-    def get(self, *, sender: int, receiver: int) -> Row | None: ...
+    def get(self, *, sender: str, receiver: str) -> Row | None: ...
     @overload#3
-    def get(self, *, sender: int) -> list[Row]: ...
+    def get(self, *, sender: str) -> list[Row]: ...
     @overload#4
-    def get(self, *, receiver: int) -> list[Row]: ...
+    def get(self, *, receiver: str) -> list[Row]: ...
     @overload#5
-    def get(self, *, sender: int, type: rq_type) -> list[Row]: ...
+    def get(self, *, sender: str, type: rq_type) -> list[Row]: ...
     @overload#6
-    def get(self, *, receiver: int, type: rq_type) -> list[Row]: ...
+    def get(self, *, receiver: str, type: rq_type) -> list[Row]: ...
     @overload#7
-    def get(self, *, sender: int, mutual: rq_type) -> list[Row]: ...
+    def get(self, *, sender: str, mutual: rq_type) -> list[Row]: ...
     @overload#8
-    def get(self, *, receiver: int, mutual: rq_type) -> list[Row]: ...
+    def get(self, *, receiver: str, mutual: rq_type) -> list[Row]: ...
     def get(self, *,
             id: int | None = None,
-            sender: int | None = None,
-            receiver: int | None = None,
+            sender: str | None = None,
+            receiver: str | None = None,
             type: rq_type | None = None,
             mutual: rq_type | None = None
         ) -> list[Row] | Row | None:
-        def q(sender: int | None, receiver: int | None) -> tuple[str, int]:
+        def q(sender: str | None, receiver: str | None) -> tuple[str, str]:
             return f"""
-                SELECT r1.receiver AS id
+                SELECT r1.receiver AS username
                 FROM relationships r1
                 JOIN relationships r2
                     ON r2.sender = r1.receiver
@@ -73,7 +73,7 @@ class Relationships(Table):
                 WHERE r1.{"sender" if sender is not None else "receiver"} = ?
                     AND r1.{mutual}_since IS NOT NULL
                     AND r2.{mutual}_since IS NOT NULL;
-            """, cast(int, sender if sender is not None else receiver)
+            """, cast(str, sender if sender is not None else receiver)
         if id is not None:
             return self.utils.get(over(id=id))
         if sender is not None and receiver is not None:
@@ -86,21 +86,21 @@ class Relationships(Table):
     @overload#1
     def exists(self, *, id: int) -> bool: ...
     @overload#2
-    def exists(self, *, sender: int, receiver: int) -> bool: ...
-    def exists(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None) -> bool:
+    def exists(self, *, sender: str, receiver: str) -> bool: ...
+    def exists(self, *, id: int | None = None, sender: str | None = None, receiver: str | None = None) -> bool:
         return self.utils.any(over(id=id, sender=sender, receiver=receiver))
     @overload#1
     def set(self, *, id: int, **kwargs: Any) -> None: ...
     @overload#2
-    def set(self, *, sender: int, receiver: int, **kwargs: Any) -> None: ...
-    def set(self, *, id: int | None = None, sender: int | None = None, receiver: int | None = None, **kwargs: Any) -> None:
+    def set(self, *, sender: str, receiver: str, **kwargs: Any) -> None: ...
+    def set(self, *, id: int | None = None, sender: str | None = None, receiver: str | None = None, **kwargs: Any) -> None:
         self.utils.set(over(id=id, sender=sender, receiver=receiver), kwargs)
-    def set_friend(self, sender: int, receiver: int, v: bool) -> None:
+    def set_friend(self, sender: str, receiver: str, v: bool) -> None:
         if self.exists(sender=sender, receiver=receiver):
             self.set(sender=sender, receiver=receiver, friend_since=now() if v else None)
         else:
             self.create(sender=sender, receiver=receiver, type="friend")
-    def set_blocked(self, sender: int, receiver: int, v: bool) -> None:
+    def set_blocked(self, sender: str, receiver: str, v: bool) -> None:
         if self.exists(sender=sender, receiver=receiver):
             self.set(sender=sender, receiver=receiver, blocked_since=now() if v else None)
         else:

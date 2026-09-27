@@ -26,13 +26,13 @@ class Tokens(Table):
     def init(self) -> None:
         self.utils.init(
             id="INTEGER PRIMARY KEY AUTOINCREMENT",
-            owner="INTEGER NOT NULL -> users(id) ON DELETE CASCADE",
+            owner="TEXT NOT NULL -> users(username) ON DELETE CASCADE",
             archived_at="TEXT",
             token_hash="TEXT UNIQUE NOT NULL",
             created_at="TEXT NOT NULL",
             last_used_at="TEXT"
         )
-    def create(self, owner: int) -> str:
+    def create(self, owner: str) -> str:
         token = secrets.token_urlsafe(64)
         self.utils.create(owner=owner, token_hash=hash(token), created_at=now())
         return token

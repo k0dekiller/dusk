@@ -129,13 +129,13 @@ def app(db_path: str = "data.db") -> Flask:
                     if not v.username(username):
                         return err.invalid_username()
                     # check if username exists
-                    if not users.valid(username=username):
+                    if not users.valid(username):
                         return err.wrong_username()
                 return f(*args, **kwargs)
             return wrapper
         return w
 
-    def owner(token: str) -> int:
+    def owner(token: str) -> str:
         """Returns the `token`'s owner."""
         return row(tokens.get(token=token))["owner"]
 
@@ -156,9 +156,7 @@ def app(db_path: str = "data.db") -> Flask:
                 return err.invalid_login()
             if not users.login(username, password):
                 return err.wrong_login()
-            info = row(users.get(username=username))
-            id: int = info["id"]
-            token = tokens.create(id)
+            token = tokens.create(username)
             return success({"token": token})
 
         @app.post(path("signup"))
@@ -173,7 +171,7 @@ def app(db_path: str = "data.db") -> Flask:
             if not (invites.valid(code=invite)):
                 return err.invalid_invite()
             # check if username is taken
-            if users.exists(username=username):
+            if users.exists(username):
                 return err.username_taken()
 
             # get invite info
@@ -208,15 +206,15 @@ def app(db_path: str = "data.db") -> Flask:
         path = Root.sub("friends")
 
         @staticmethod
-        def _root(user: int) -> set[int]:
+        def _root(user: str) -> set[str]:
             return set(r[0] for r in relationships.get(sender=user, mutual="friend"))
         
         @staticmethod
-        def _incoming(user: int) -> set[int]:
+        def _incoming(user: str) -> set[str]:
             return set(r["sender"] for r in relationships.get(receiver=user)) - Friends._root(user)
         
         @staticmethod
-        def _outgoing(user: int) -> set[int]:
+        def _outgoing(user: str) -> set[str]:
             return set(r["receiver"] for r in relationships.get(sender=user)) - Friends._root(user)
 
         @app.get(path(""))
@@ -246,15 +244,14 @@ def app(db_path: str = "data.db") -> Flask:
 
         @staticmethod
         def _relationship(token: str, receiver: str, action: Literal["friend", "blocked"], value: bool, conflict_desc: str | None) -> response:
-            s: int = row(tokens.get(token=token))["owner"]
-            r: int = row(users.get(username=receiver))["id"]
-            if s == r:
+            sender: str = row(tokens.get(token=token))["owner"]
+            if sender == receiver:
                 return jsonify(rest.error(
                     rest.err.param.value.invalid,
                     desc=f"Sender can't also be receiver",
                     params="username"
                 ))
-            relationship = relationships.get(sender=s, receiver=r)
+            relationship = relationships.get(sender=sender, receiver=receiver)
             if relationship is not None and relationship[f"{action}_since"] is not None:
                 return jsonify(rest.error(
                     rest.err.resource.already_exists,
@@ -262,8 +259,8 @@ def app(db_path: str = "data.db") -> Flask:
                     params="<receiver>"
                 )), 400
             match action:
-                case "friend":  relationships.set_friend(s, r, value)
-                case "blocked": relationships.set_blocked(s, r, value)
+                case "friend":  relationships.set_friend(sender, receiver, value)
+                case "blocked": relationships.set_blocked(sender, receiver, value)
             return success()
 
         @app.post(path("<receiver>/friend"))
