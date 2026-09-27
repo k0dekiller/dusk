@@ -88,12 +88,12 @@ class Client:
 
     @overload
     def signup(self, invite: str) -> None:
-        """Signs up `self` by consuming a specified `invite`."""
+        """Signs up by consuming a specified `invite`."""
     @overload
     def signup(self) -> None:
-        """Signs up `self` without consuming an invite."""
+        """Signs up without consuming an invite."""
     def signup(self, invite: str | None = None) -> None:
-        """Signs up `self`."""
+        """Signs up."""
         self._post(self.endpoints.signup, {
             "invite": invite,
             "username": self.username,
@@ -101,7 +101,7 @@ class Client:
         })
 
     def login(self) -> str:
-        """Logs in `self` and returns the resulting `self.token`."""
+        """Logs in and returns the resulting `self.token`."""
         r = self._post(self.endpoints.login, {
             "username": self.username,
             "password": self.password
