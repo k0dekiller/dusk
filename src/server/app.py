@@ -263,27 +263,27 @@ def app(db_path: str = "data.db") -> Flask:
                 case "blocked": relationships.set_blocked(sender, receiver, value)
             return success()
 
-        @app.post(path("<receiver>/friend"))
+        @app.post(path("<user>/friend"))
         @rest.require("value")
         @token
-        @user("receiver")
+        @user("user")
         @staticmethod
-        def friend(token: str, receiver: str, value: bool) -> response:
+        def friend(token: str, user: str, value: bool) -> response:
             """Handles user friend settings."""
             return Users._relationship(
-                token, receiver, "friend", value,
+                token, user, "friend", value,
                 "Receiver is already a friend"
             )
 
-        @app.post(path("<receiver>/block"))
+        @app.post(path("<user>/block"))
         @rest.require("value")
         @token
-        @user("receiver")
+        @user("user")
         @staticmethod
-        def block(token: str, receiver: str, value: bool) -> response:
+        def block(token: str, user: str, value: bool) -> response:
             """Handles user block settings."""
             return Users._relationship(
-                token, receiver, "blocked", value,
+                token, user, "blocked", value,
                 "Receiver is already blocked"
             )
 
