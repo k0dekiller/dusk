@@ -244,7 +244,7 @@ def app(db_path: str = "data.db") -> Flask:
 
         @staticmethod
         def _relationship(token: str, receiver: str, action: Literal["friend", "blocked"], value: bool, conflict_desc: str | None) -> response:
-            sender: str = row(tokens.get(token=token))["owner"]
+            sender = owner(token)
             if sender == receiver:
                 return jsonify(rest.error(
                     rest.err.param.value.invalid,
