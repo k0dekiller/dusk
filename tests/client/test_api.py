@@ -231,3 +231,22 @@ class TestRelationships:
 
     def test_blocked_valid(self, client2: Client, username1: str) -> None:
         assert client2.blocked() == [username1]
+
+class TestInfo:
+    def test_info_self(self, client1: Client, username1: str) -> None:
+        info = client1.info()
+        assert info.get(username1, None) is not None
+        assert info[username1].get("created_at", None) is not None
+
+    def test_info_invalid(self, client1: Client) -> None:
+        with error("access.forbidden", "'x'"):
+            client1.info("x")
+
+    def test_info_stranger(self, client1: Client) -> None:
+        with error("access.forbidden", "'system'"):
+            client1.info("system")
+
+    def test_info_friend(self, client1: Client, username2: str) -> None:
+        info = client1.info(username2)
+        assert info.get(username2, None) is not None
+        assert info[username2].get("created_at", None) is not None

@@ -36,7 +36,7 @@ class Client:
             @staticmethod
             def info(usernames: list[str] | str | None) -> str:
                 """Returns the endpoint for getting the users `usernames`'s info."""
-                return f"users/{",".join(list(usernames)) if usernames else "@"}/info"
+                return f"users/{",".join([usernames] if isinstance(usernames, str) else usernames) if usernames else "@"}/info"
     @overload
     def __init__(self, server: str, *, token: str) -> None: ...
     @overload
@@ -155,3 +155,9 @@ class Client:
         self._post(self.endpoints.users.block(username), {
             "value": v
         })
+
+    def info(self, usernames: list[str] | str | None = None) -> dict[str, dict[str, Any]]:
+        """Returns the users `usernames`'s info."""
+        self._require_token()
+        r = self._get(self.endpoints.users.info(usernames))
+        return r.json()["data"]

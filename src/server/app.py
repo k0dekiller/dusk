@@ -295,6 +295,25 @@ def app(db_path: str = "data.db") -> Flask:
                 "Receiver is already blocked"
             )
 
+        @app.get(path("<user>/info"))
+        @token
+        @staticmethod
+        def info(token: str, user: str) -> response:
+            """Returns friends' (separated by `,`) info."""
+            this = owner(token)
+            info: dict[str, dict[str, Any]] = {}
+            e: list[str] = []
+            for u in user.split(","):
+                if u == "@": u = this
+                if not (this == u or u in Friends.get_mutual(this)):
+                    e.append(repr(user))
+                if e: continue
+                info[u] = {k: v for k, v in dict(cast(Row, users.get(this))).items() if k in [
+                    "created_at"
+                ]}
+            if e: return err.forbidden(params=e)
+            return success(info)
+
     return app
 
 if __name__ == "__main__":
