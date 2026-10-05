@@ -11,6 +11,7 @@ from .rest import response
 from . import db
 from .key import Key
 from . import validator as v
+from .utils import *
 
 def mkpath(path: str = "") -> Callable[[str], str]:
     """Returns a function that appends a subpath to `path`."""
@@ -100,6 +101,14 @@ def app(db_path: str = "data.db") -> Flask:
                 params="invite"
             )), 400
         @staticmethod
+        def expired_invite() -> response:
+            """Returns an error response specifying that the specified invite is expired."""
+            return jsonify(rest.error(
+                rest.err.resource.expired,
+                desc=f"Expired invite code",
+                params="invite"
+            )), 400
+        @staticmethod
         def forbidden(desc: str | None = None, params: list[str] | str | None = None) -> response:
             """Returns an error response specifying that access to the requested resource is forbidden."""
             return jsonify(rest.error(
@@ -175,18 +184,25 @@ def app(db_path: str = "data.db") -> Flask:
             # check if username and password are valid
             if not (v.username(username) and v.password(password)):
                 return err.invalid_login()
+            
             # check if invite is valid
             if not (invites.valid(code=invite)):
                 return err.invalid_invite()
-            # check if username is taken
-            if users.exists(username):
-                return err.username_taken()
 
             # get invite info
             info = row(invites.get(code=invite))
             id: int = info["id"]
             count: int = info["use_count"]
             max: int | None = info["max_uses"]
+            expiry: str | None = info["expires_at"]
+
+            # check if invite is expired
+            if expiry is not None and dt_now() > dt(expiry):
+                return err.expired_invite()
+            
+            # check if username is taken
+            if users.exists(username):
+                return err.username_taken()
 
             # consume the invite
             count += 1

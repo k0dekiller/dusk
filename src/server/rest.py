@@ -21,6 +21,7 @@ class err:
     class resource:
         """The namespace that contains all resource-related error codes."""
         already_exists: Final = "param.resource.already_exists"
+        expired: Final = "param.resource.expired"
     class header:
         """The namespace that contains all header-related error codes."""
         missing: Final = "header.missing"

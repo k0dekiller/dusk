@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any
 from collections.abc import Generator
 
@@ -78,6 +79,9 @@ def new_invite(invites: Invites, user: str) -> str:
 @fixture(scope="session")
 def invite(invites: Invites, user: str) -> str:
     return invites.create(user)
+@fixture(scope="session")
+def expired_invite(invites: Invites, user: str) -> str:
+    return invites.create(user, expires_at=datetime.fromtimestamp(0, timezone.utc).isoformat())
 
 # CLIENT FIXTURES
 @fixture(scope="session")
@@ -136,6 +140,10 @@ class TestSignup:
     def test_invite_invalid(self, client1: Client) -> None:
         with error("param.value.invalid", "invite"):
             client1.signup("invalid")
+
+    def test_invite_expired(self, client1: Client, expired_invite: str) -> None:
+        with error("param.resource.expired", "invite"):
+            client1.signup(expired_invite)
 
     def test_username_invalid(self, new_invite: str) -> None:
         with error("param.value.invalid", ["username", "password"]):

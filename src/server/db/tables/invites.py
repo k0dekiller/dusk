@@ -31,11 +31,12 @@ class Invites(Table):
             max_uses="INTEGER",
             created_at="TEXT NOT NULL",
             use_count="INTEGER NOT NULL DEFAULT 0",
-            archived_at="TEXT"
+            archived_at="TEXT",
+            expires_at="TEXT"
         )
-    def create(self, owner: str, max_uses: int | None = 1) -> str:
+    def create(self, owner: str, max_uses: int | None = 1, expires_at: str | None = None) -> str:
         code = secrets.token_urlsafe(10)
-        self.utils.create(code=code, owner=owner, max_uses=max_uses, created_at=now())
+        self.utils.create(code=code, owner=owner, max_uses=max_uses, created_at=now(), expires_at=expires_at)
         return code
     @overload#1
     def get(self, *, code: str) -> Row | None: ...

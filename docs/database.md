@@ -42,7 +42,7 @@ Returns `True` if a `Row` object is archived.
     - [x] `created_at`
     - [x] `use_count`
     - [x] `archived_at?`
-    - [ ] `expires_at?`
+    - [x] `expires_at?`
 - [x] `users`
     - [x] `username`
     - [x] `password_hash`
