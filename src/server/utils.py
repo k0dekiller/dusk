@@ -9,9 +9,15 @@ class UnknownOverloadException(Exception):
 
 ph = PasswordHasher()
 
+def dt_now() -> datetime:
+    """Returns the current date and time as a `datetime` object."""
+    return datetime.now(timezone.utc)
 def now() -> str:
     """Returns the current ISO-formatted date and time."""
-    return datetime.now(timezone.utc).isoformat()
+    return dt_now().isoformat()
+def dt(s: str) -> datetime:
+    """Converts an ISO-formatted date and time string `s` to a `datetime` object."""
+    return datetime.fromisoformat(s)
 
 @overload#1
 def hash(s: str) -> str: ...
