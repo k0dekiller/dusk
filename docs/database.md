@@ -59,8 +59,8 @@ Returns `True` if a `Row` object is archived.
     - [x] `last_used_at?`
 - [x] `relationships`
     - [x] `id`
-    - [x] `sender` **→** `users.id`
-    - [x] `receiver` **→** `users.id`
+    - [x] `sender` **→** `users.username`
+    - [x] `receiver` **→** `users.username`
     - [x] `created_at`
     - [x] `friend_since?`
     - [x] `blocked_since?`
